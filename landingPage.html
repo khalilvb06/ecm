@@ -455,22 +455,58 @@
     
     .modern-color-option label {
       display: block;
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       border: 2px solid #e0e0e0;
       cursor: pointer;
       transition: all 0.3s ease;
       position: relative;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .modern-color-option label:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     
     .modern-color-option input[type="radio"]:checked + label {
-      border-color: var(--btn-color, #007bff);
-      transform: scale(1.1);
+      border: 3px solid var(--btn-color, #007bff);
+      transform: scale(1.15);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     
     .modern-color-option input[type="radio"]:checked + label:hover {
-      transform: scale(1.15);
+      transform: scale(1.2);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    }
+    
+    /* تحسين عرض اللون الأبيض */
+    .modern-color-option label[style*="background:white"],
+    .modern-color-option label[style*="background:#fff"],
+    .modern-color-option label[style*="background:#ffffff"],
+    .modern-color-option label[style*="background:rgb(255,255,255)"],
+    .modern-color-option label[style*="background:rgba(255,255,255"] {
+      border: 2px solid #ccc;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    
+    .modern-color-option label[style*="background:white"]:hover,
+    .modern-color-option label[style*="background:#fff"]:hover,
+    .modern-color-option label[style*="background:#ffffff"]:hover,
+    .modern-color-option label[style*="background:rgb(255,255,255)"]:hover,
+    .modern-color-option label[style*="background:rgba(255,255,255"]:hover {
+      border-color: #999;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    
+    .modern-color-option input[type="radio"]:checked + label[style*="background:white"],
+    .modern-color-option input[type="radio"]:checked + label[style*="background:#fff"],
+    .modern-color-option input[type="radio"]:checked + label[style*="background:#ffffff"],
+    .modern-color-option input[type="radio"]:checked + label[style*="background:rgb(255,255,255)"],
+    .modern-color-option input[type="radio"]:checked + label[style*="background:rgba(255,255,255"] {
+      border: 3px solid var(--btn-color, #007bff);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
     }
     
     .modern-size-options {
@@ -676,9 +712,20 @@
       }
       
       .modern-color-option label {
-        width: 30px;
-        height: 30px;
+        width: 35px;
+        height: 35px;
         border-width: 3px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+      }
+      
+      /* تحسين عرض اللون الأبيض على الهواتف */
+      .modern-color-option label[style*="background:white"],
+      .modern-color-option label[style*="background:#fff"],
+      .modern-color-option label[style*="background:#ffffff"],
+      .modern-color-option label[style*="background:rgb(255,255,255)"],
+      .modern-color-option label[style*="background:rgba(255,255,255"] {
+        border: 3px solid #bbb;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.25);
       }
       
       .modern-size-option label {
@@ -799,7 +846,7 @@
     
     /* تحسينات إضافية للفورم الجديد */
     .modern-form-container {
-      animation: fadeInUp 0.6s ease-out, formDance 3s ease-in-out infinite;
+      animation: fadeInUp 0.6s ease-out;
       border-color: var(--btn-color, #007bff);
     }
     
@@ -989,14 +1036,7 @@
       }
     }
     
-    @keyframes formDance {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-2px);
-      }
-    }
+
     
     @keyframes desktopButtonFloat {
       0%, 100% {
@@ -1305,6 +1345,47 @@
           display: none !important;
         }
       }
+    
+    /* تحسين عرض الألوان مع مؤشر بصري */
+    .modern-color-option label::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    
+    .modern-color-option input[type="radio"]:checked + label::after {
+      opacity: 1;
+    }
+    
+    /* تحسين عرض اللون الأبيض مع مؤشر مختلف */
+    .modern-color-option label[style*="background:white"]::after,
+    .modern-color-option label[style*="background:#fff"]::after,
+    .modern-color-option label[style*="background:#ffffff"]::after,
+    .modern-color-option label[style*="background:rgb(255,255,255)"]::after,
+    .modern-color-option label[style*="background:rgba(255,255,255"]::after {
+      background: #333;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+    
+    /* تحسين عرض الألوان الفاتحة */
+    .modern-color-option label[style*="background:yellow"]::after,
+    .modern-color-option label[style*="background:#ffff00"]::after,
+    .modern-color-option label[style*="background:rgb(255,255,0)"]::after,
+    .modern-color-option label[style*="background:rgba(255,255,0"]::after,
+    .modern-color-option label[style*="background:lightyellow"]::after,
+    .modern-color-option label[style*="background:#ffffe0"]::after {
+      background: #333;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
   </style>
   
   <script type="module">
