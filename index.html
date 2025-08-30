@@ -249,6 +249,75 @@
       opacity: 0.9;
     }
 
+    /* مودل الفلترة */
+    .filter-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .filter-modal.active {
+      display: flex;
+    }
+
+    .filter-modal-content {
+      background: #fff;
+      border-radius: 15px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .filter-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 1rem;
+    }
+
+    .filter-modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #666;
+      cursor: pointer;
+    }
+
+    .filter-modal-body {
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-modal-body .form-select,
+    .filter-modal-body .btn {
+      width: 100%;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+    }
+
+    .filter-modal-footer {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      border-top: 1px solid #eee;
+      padding-top: 1rem;
+    }
+
+    .filter-modal-footer .btn {
+      min-width: 100px;
+    }
+
     /* زر القائمة للهواتف */
     .menu-btn {
       display: none;
@@ -266,6 +335,24 @@
       opacity: 0.9;
     }
 
+    /* زر الفلترة للهواتف */
+    .filter-btn {
+      display: none;
+      background: var(--button-color, #007bff);
+      color: var(--button-text-color, #ffffff);
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      margin-right: 0.5rem;
+    }
+
+    .filter-btn:hover {
+      background: var(--button-color, #007bff);
+      opacity: 0.9;
+    }
+
     /* القائمة الجانبية */
     .sidebar {
       position: fixed;
@@ -278,6 +365,7 @@
       z-index: 1000;
       transition: right 0.3s ease;
       padding: 2rem 1rem;
+      overflow-y: auto;
     }
 
     .sidebar.open {
@@ -305,6 +393,7 @@
       list-style: none;
       padding: 0;
       margin: 0;
+      margin-bottom: 2rem;
     }
 
     .sidebar-nav li {
@@ -324,6 +413,53 @@
     .sidebar-nav a:hover {
       background: var(--button-color, #007bff);
       color: var(--button-text-color, #ffffff);
+    }
+
+    /* زر تبديل الفلاتر في السايد بار */
+    .sidebar-filter-toggle {
+      margin-bottom: 1rem;
+      border-top: 1px solid #eee;
+      padding-top: 1rem;
+    }
+
+    .sidebar-filter-toggle .btn {
+      font-size: 0.9rem;
+      border-radius: 8px;
+    }
+
+    /* قسم الفلترة في السايد بار */
+    .sidebar-filters {
+      display: none;
+      border-top: 1px solid #eee;
+      padding-top: 1rem;
+    }
+
+    .sidebar-filters.show {
+      display: block;
+    }
+
+    .sidebar-filters h6 {
+      color: #333;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .sidebar-filters .form-select,
+    .sidebar-filters .btn {
+      width: 100%;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      border-radius: 8px;
+    }
+
+    .sidebar-filters .btn-outline-secondary {
+      border-color: #6c757d;
+      color: #6c757d;
+    }
+
+    .sidebar-filters .btn-outline-secondary:hover {
+      background: #6c757d;
+      color: white;
     }
 
     .sidebar-overlay {
@@ -389,9 +525,15 @@
         flex-shrink: 0;
       }
 
+      .filter-btn {
+        display: block;
+        order: 4;
+        flex-shrink: 0;
+      }
+
       .menu-btn {
         display: block;
-        order:1;
+        order: 1;
         flex-shrink: 0;
       }
 
@@ -424,6 +566,11 @@
       .sidebar {
         width: 280px;
       }
+
+      .filter-btn {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+      }
     }
 
     /* التجاوب للهواتف الصغيرة جداً */
@@ -439,6 +586,11 @@
 
       .sidebar {
         width: 260px;
+      }
+
+      .filter-btn {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
       }
     }
     
@@ -880,6 +1032,13 @@
       }
     }
 
+    /* إظهار قسم الفلترة المصغرة فقط في الشاشات الكبيرة */
+    @media (min-width: 769px) {
+      .mini-filter-section {
+        display: block !important;
+      }
+    }
+
     @media (max-width: 1200px) {
       .container {
         max-width: 960px;
@@ -960,18 +1119,9 @@
 
 
 
+      /* إخفاء قسم الفلترة المصغرة في الشاشات الصغيرة */
       .mini-filter-section {
-        padding: 0.75rem !important;
-      }
-
-      .mini-filter-section .row > div {
-        margin-bottom: 0.5rem;
-      }
-
-      .mini-filter-section .form-select,
-      .mini-filter-section #category-filter,
-      .mini-filter-section #clear-filters {
-        font-size: 0.8rem;
+        display: none !important;
       }
     }
 
@@ -1379,8 +1529,10 @@
       <i class="bi bi-list"></i>
     </button>
 
-    <!-- قسم البحث -->
-    
+    <!-- زر الفلترة للهواتف -->
+    <button class="filter-btn" onclick="openFilterModal()">
+      <i class="bi bi-filter"></i> فلتر
+    </button>
 
     <!-- زر البحث للهواتف -->
     <button class="search-modal-btn" onclick="openSearchModal()">
@@ -1404,6 +1556,60 @@
     </div>
   </div>
 
+  <!-- مودل الفلترة -->
+  <div class="filter-modal" id="filter-modal">
+    <div class="filter-modal-content">
+      <div class="filter-modal-header">
+        <h5>فلتر المنتجات</h5>
+        <button class="filter-modal-close" onclick="closeFilterModal()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="filter-modal-body">
+        <div class="mb-3">
+          <label class="form-label">التصنيف</label>
+          <select id="mobile-category-filter" class="form-select">
+            <option value="">جميع التصنيفات</option>
+            <!-- سيتم تعبئة التصنيفات ديناميكياً -->
+          </select>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">السعر</label>
+          <select id="mobile-price-filter" class="form-select">
+            <option value="">جميع الأسعار</option>
+            <option value="0-1000">أقل من 1000 دج</option>
+            <option value="1000-5000">1000 - 5000 دج</option>
+            <option value="5000-10000">5000 - 10000 دج</option>
+            <option value="10000+">أكثر من 10000 دج</option>
+          </select>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">الترتيب</label>
+          <select id="mobile-sort-filter" class="form-select">
+            <option value="newest">الأحدث</option>
+            <option value="oldest">الأقدم</option>
+            <option value="price-low">السعر: من الأقل للأعلى</option>
+            <option value="price-high">السعر: من الأعلى للأقل</option>
+            <option value="name-asc">الاسم: أ-ي</option>
+            <option value="name-desc">الاسم: ي-أ</option>
+          </select>
+        </div>
+        
+        <div class="mb-3">
+          <button id="mobile-clear-filters" class="btn btn-outline-secondary w-100">
+            <i class="fas fa-redo"></i> إعادة تعيين
+          </button>
+        </div>
+      </div>
+      <div class="filter-modal-footer">
+        <button class="btn btn-secondary" onclick="closeFilterModal()">إغلاق</button>
+        <button class="btn btn-primary" onclick="applyMobileFilters()">تطبيق الفلترة</button>
+      </div>
+    </div>
+  </div>
+
   <!-- القائمة الجانبية -->
   <div class="sidebar-overlay" onclick="closeSidebar()"></div>
   <div class="sidebar" id="sidebar">
@@ -1419,6 +1625,49 @@
       <li><a href="all-products.html"><i class="bi bi-bag"></i> كل المنتجات</a></li>
       <li><a href="about-us.html"><i class="bi bi-info-circle"></i> عن المتجر</a></li>
     </ul>
+    
+    <!-- زر إظهار/إخفاء الفلاتر -->
+    <div class="sidebar-filter-toggle">
+      <button class="btn btn-outline-primary w-100" onclick="toggleSidebarFilters()">
+        <i class="bi bi-funnel"></i> إظهار الفلاتر
+      </button>
+    </div>
+    
+    <!-- قسم الفلاتر في السايد بار -->
+    <div class="sidebar-filters" id="sidebar-filters">
+      <h6>فلتر التصنيفات</h6>
+      <select id="sidebar-category-filter" class="form-select">
+        <option value="">جميع التصنيفات</option>
+        <!-- سيتم تعبئة التصنيفات ديناميكياً -->
+      </select>
+      
+      <h6>فلتر السعر</h6>
+      <select id="sidebar-price-filter" class="form-select">
+        <option value="">جميع الأسعار</option>
+        <option value="0-1000">أقل من 1000 دج</option>
+        <option value="1000-5000">1000 - 5000 دج</option>
+        <option value="5000-10000">5000 - 10000 دج</option>
+        <option value="10000+">أكثر من 10000 دج</option>
+      </select>
+      
+      <h6>الترتيب</h6>
+      <select id="sidebar-sort-filter" class="form-select">
+        <option value="newest">الأحدث</option>
+        <option value="oldest">الأقدم</option>
+        <option value="price-low">السعر: من الأقل للأعلى</option>
+        <option value="price-high">السعر: من الأعلى للأقل</option>
+        <option value="name-asc">الاسم: أ-ي</option>
+        <option value="name-desc">الاسم: ي-أ</option>
+      </select>
+      
+      <button id="sidebar-clear-filters" class="btn btn-outline-secondary w-100">
+        <i class="fas fa-redo"></i> إعادة تعيين
+      </button>
+      
+      <button class="btn btn-primary w-100" onclick="applySidebarFilters()">
+        <i class="bi bi-check"></i> تطبيق الفلترة
+      </button>
+    </div>
   </div>
 
   <main class="container py-5">
@@ -1812,6 +2061,160 @@
       }
     }
 
+    // دوال مودل الفلترة
+    function openFilterModal() {
+      const modal = document.getElementById('filter-modal');
+      modal.classList.add('active');
+      
+      // مزامنة القيم مع الفلاتر الموجودة
+      syncFilterValues();
+    }
+
+    function closeFilterModal() {
+      const modal = document.getElementById('filter-modal');
+      modal.classList.remove('active');
+    }
+
+    function syncFilterValues() {
+      // مزامنة قيم الفلاتر من الفلاتر الرئيسية
+      const categoryFilter = document.getElementById('category-filter');
+      const priceFilter = document.getElementById('price-filter');
+      const sortFilter = document.getElementById('sort-filter');
+      
+      const mobileCategoryFilter = document.getElementById('mobile-category-filter');
+      const mobilePriceFilter = document.getElementById('mobile-price-filter');
+      const mobileSortFilter = document.getElementById('mobile-sort-filter');
+      
+      if (categoryFilter && mobileCategoryFilter) {
+        mobileCategoryFilter.value = categoryFilter.value;
+      }
+      if (priceFilter && mobilePriceFilter) {
+        mobilePriceFilter.value = priceFilter.value;
+      }
+      if (sortFilter && mobileSortFilter) {
+        mobileSortFilter.value = sortFilter.value;
+      }
+    }
+
+    function applyMobileFilters() {
+      // تطبيق الفلاتر من مودل الهاتف
+      const mobileCategoryFilter = document.getElementById('mobile-category-filter');
+      const mobilePriceFilter = document.getElementById('mobile-price-filter');
+      const mobileSortFilter = document.getElementById('mobile-sort-filter');
+      
+      // مزامنة مع الفلاتر الرئيسية
+      const categoryFilter = document.getElementById('category-filter');
+      const priceFilter = document.getElementById('price-filter');
+      const sortFilter = document.getElementById('sort-filter');
+      
+      if (categoryFilter && mobileCategoryFilter) {
+        categoryFilter.value = mobileCategoryFilter.value;
+      }
+      if (priceFilter && mobilePriceFilter) {
+        priceFilter.value = mobilePriceFilter.value;
+      }
+      if (sortFilter && mobileSortFilter) {
+        sortFilter.value = mobileSortFilter.value;
+      }
+      
+      // تطبيق الفلترة
+      filterProducts();
+      
+      // إغلاق المودل
+      closeFilterModal();
+    }
+
+    // دالة إعادة تعيين الفلاتر في مودل الهاتف
+    function clearMobileFilters() {
+      const mobileCategoryFilter = document.getElementById('mobile-category-filter');
+      const mobilePriceFilter = document.getElementById('mobile-price-filter');
+      const mobileSortFilter = document.getElementById('mobile-sort-filter');
+      
+      if (mobileCategoryFilter) mobileCategoryFilter.value = '';
+      if (mobilePriceFilter) mobilePriceFilter.value = '';
+      if (mobileSortFilter) mobileSortFilter.value = 'newest';
+    }
+
+    // دوال الفلاتر في السايد بار
+    function toggleSidebarFilters() {
+      const sidebarFilters = document.getElementById('sidebar-filters');
+      const toggleBtn = document.querySelector('.sidebar-filter-toggle .btn');
+      
+      if (sidebarFilters.classList.contains('show')) {
+        sidebarFilters.classList.remove('show');
+        toggleBtn.innerHTML = '<i class="bi bi-funnel"></i> إظهار الفلاتر';
+        toggleBtn.classList.remove('btn-primary');
+        toggleBtn.classList.add('btn-outline-primary');
+      } else {
+        sidebarFilters.classList.add('show');
+        toggleBtn.innerHTML = '<i class="bi bi-funnel-fill"></i> إخفاء الفلاتر';
+        toggleBtn.classList.remove('btn-outline-primary');
+        toggleBtn.classList.add('btn-primary');
+        
+        // مزامنة القيم مع الفلاتر الرئيسية
+        syncSidebarFilterValues();
+      }
+    }
+
+    function syncSidebarFilterValues() {
+      // مزامنة قيم الفلاتر من الفلاتر الرئيسية
+      const categoryFilter = document.getElementById('category-filter');
+      const priceFilter = document.getElementById('price-filter');
+      const sortFilter = document.getElementById('sort-filter');
+      
+      const sidebarCategoryFilter = document.getElementById('sidebar-category-filter');
+      const sidebarPriceFilter = document.getElementById('sidebar-price-filter');
+      const sidebarSortFilter = document.getElementById('sidebar-sort-filter');
+      
+      if (categoryFilter && sidebarCategoryFilter) {
+        sidebarCategoryFilter.value = categoryFilter.value;
+      }
+      if (priceFilter && sidebarPriceFilter) {
+        sidebarPriceFilter.value = priceFilter.value;
+      }
+      if (sortFilter && sidebarSortFilter) {
+        sidebarSortFilter.value = sortFilter.value;
+      }
+    }
+
+    function applySidebarFilters() {
+      // تطبيق الفلاتر من السايد بار
+      const sidebarCategoryFilter = document.getElementById('sidebar-category-filter');
+      const sidebarPriceFilter = document.getElementById('sidebar-price-filter');
+      const sidebarSortFilter = document.getElementById('sidebar-sort-filter');
+      
+      // مزامنة مع الفلاتر الرئيسية
+      const categoryFilter = document.getElementById('category-filter');
+      const priceFilter = document.getElementById('price-filter');
+      const sortFilter = document.getElementById('sort-filter');
+      
+      if (categoryFilter && sidebarCategoryFilter) {
+        categoryFilter.value = sidebarCategoryFilter.value;
+      }
+      if (priceFilter && sidebarPriceFilter) {
+        priceFilter.value = sidebarPriceFilter.value;
+      }
+      if (sortFilter && sidebarSortFilter) {
+        sortFilter.value = sidebarSortFilter.value;
+      }
+      
+      // تطبيق الفلترة
+      filterProducts();
+      
+      // إغلاق السايد بار
+      closeSidebar();
+    }
+
+    function clearSidebarFilters() {
+      const sidebarCategoryFilter = document.getElementById('sidebar-category-filter');
+      const sidebarPriceFilter = document.getElementById('sidebar-price-filter');
+      const sidebarSortFilter = document.getElementById('sidebar-sort-filter');
+      
+      if (sidebarCategoryFilter) sidebarCategoryFilter.value = '';
+      if (sidebarPriceFilter) sidebarPriceFilter.value = '';
+      if (sidebarSortFilter) sidebarSortFilter.value = 'newest';
+    }
+
     // إضافة الدوال للـ window object
     window.performSearch = performSearch;
     window.toggleSidebar = toggleSidebar;
@@ -1820,6 +2223,12 @@
     window.closeSearchModal = closeSearchModal;
     window.performModalSearch = performModalSearch;
     window.filterByCategory = filterByCategory;
+    window.openFilterModal = openFilterModal;
+    window.closeFilterModal = closeFilterModal;
+    window.applyMobileFilters = applyMobileFilters;
+    window.toggleSidebarFilters = toggleSidebarFilters;
+    window.applySidebarFilters = applySidebarFilters;
+    window.clearSidebarFilters = clearSidebarFilters;
     
 
 
@@ -1925,18 +2334,44 @@
     // دالة لتعبئة فلتر التصنيفات
     function populateCategoryFilter() {
       const categoryFilter = document.getElementById('category-filter');
-      if (!categoryFilter) return;
+      const mobileCategoryFilter = document.getElementById('mobile-category-filter');
+      const sidebarCategoryFilter = document.getElementById('sidebar-category-filter');
       
-      // إضافة خيار "جميع التصنيفات"
-      categoryFilter.innerHTML = '<option value="">جميع التصنيفات</option>';
+      // تعبئة الفلتر الرئيسي
+      if (categoryFilter) {
+        categoryFilter.innerHTML = '<option value="">جميع التصنيفات</option>';
+        
+        allCategories.forEach(category => {
+          const option = document.createElement('option');
+          option.value = category.id;
+          option.textContent = category.name;
+          categoryFilter.appendChild(option);
+        });
+      }
       
-      // إضافة التصنيفات
-      allCategories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category.id;
-        option.textContent = category.name;
-        categoryFilter.appendChild(option);
-      });
+      // تعبئة فلتر الهاتف
+      if (mobileCategoryFilter) {
+        mobileCategoryFilter.innerHTML = '<option value="">جميع التصنيفات</option>';
+        
+        allCategories.forEach(category => {
+          const option = document.createElement('option');
+          option.value = category.id;
+          option.textContent = category.name;
+          mobileCategoryFilter.appendChild(option);
+        });
+      }
+      
+      // تعبئة فلتر السايد بار
+      if (sidebarCategoryFilter) {
+        sidebarCategoryFilter.innerHTML = '<option value="">جميع التصنيفات</option>';
+        
+        allCategories.forEach(category => {
+          const option = document.createElement('option');
+          option.value = category.id;
+          option.textContent = category.name;
+          sidebarCategoryFilter.appendChild(option);
+        });
+      }
     }
 
     // دالة لعرض التصنيفات على شكل كروت
@@ -2083,6 +2518,46 @@
           clearFilters.style.transform = 'rotate(360deg)';
           setTimeout(() => {
             clearFilters.style.transform = 'rotate(0deg)';
+          }, 300);
+        });
+      }
+
+      // إعداد معالجات الأحداث للفلاتر في مودل الهاتف
+      setupMobileFilterEvents();
+      
+      // إعداد معالجات الأحداث للفلاتر في السايد بار
+      setupSidebarFilterEvents();
+    }
+
+    // دالة إعداد معالجات الأحداث للفلاتر في مودل الهاتف
+    function setupMobileFilterEvents() {
+      const mobileClearFilters = document.getElementById('mobile-clear-filters');
+      
+      if (mobileClearFilters) {
+        mobileClearFilters.addEventListener('click', () => {
+          clearMobileFilters();
+          
+          // إضافة تأثير بصري لإعادة التعيين
+          mobileClearFilters.style.transform = 'rotate(360deg)';
+          setTimeout(() => {
+            mobileClearFilters.style.transform = 'rotate(0deg)';
+          }, 300);
+        });
+      }
+    }
+
+    // دالة إعداد معالجات الأحداث للفلاتر في السايد بار
+    function setupSidebarFilterEvents() {
+      const sidebarClearFilters = document.getElementById('sidebar-clear-filters');
+      
+      if (sidebarClearFilters) {
+        sidebarClearFilters.addEventListener('click', () => {
+          clearSidebarFilters();
+          
+          // إضافة تأثير بصري لإعادة التعيين
+          sidebarClearFilters.style.transform = 'rotate(360deg)';
+          setTimeout(() => {
+            sidebarClearFilters.style.transform = 'rotate(0deg)';
           }, 300);
         });
       }
