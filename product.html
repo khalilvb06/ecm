@@ -1042,18 +1042,53 @@
     
     .modern-color-option label {
       display: block;
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      border: none;
+      border: 2px solid #e0e0e0;
       cursor: pointer;
       transition: all 0.3s ease;
       position: relative;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .modern-color-option label:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     
     .modern-color-option input[type="radio"]:checked + label {
-      border: none;
-      transform: scale(1.1);
+      border: 3px solid var(--button-color, #007bff);
+      transform: scale(1.15);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    /* تحسين عرض اللون الأبيض */
+    .modern-color-option label[style*="background:white"],
+    .modern-color-option label[style*="background:#fff"],
+    .modern-color-option label[style*="background:#ffffff"],
+    .modern-color-option label[style*="background:rgb(255,255,255)"],
+    .modern-color-option label[style*="background:rgba(255,255,255"] {
+      border: 2px solid #ccc;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    
+    .modern-color-option label[style*="background:white"]:hover,
+    .modern-color-option label[style*="background:#fff"]:hover,
+    .modern-color-option label[style*="background:#ffffff"]:hover,
+    .modern-color-option label[style*="background:rgb(255,255,255)"]:hover,
+    .modern-color-option label[style*="background:rgba(255,255,255"]:hover {
+      border-color: #999;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    
+    .modern-color-option input[type="radio"]:checked + label[style*="background:white"],
+    .modern-color-option input[type="radio"]:checked + label[style*="background:#fff"],
+    .modern-color-option input[type="radio"]:checked + label[style*="background:#ffffff"],
+    .modern-color-option input[type="radio"]:checked + label[style*="background:rgb(255,255,255)"],
+    .modern-color-option input[type="radio"]:checked + label[style*="background:rgba(255,255,255"] {
+      border: 3px solid var(--button-color, #007bff);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
     }
     
     .modern-size-options {
@@ -1289,9 +1324,21 @@
       }
       
       .modern-color-option label {
-        width: 28px;
-        height: 28px;
+        width: 35px;
+        height: 35px;
         border-radius: 50%;
+        border-width: 3px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+      }
+      
+      /* تحسين عرض اللون الأبيض على الهواتف */
+      .modern-color-option label[style*="background:white"],
+      .modern-color-option label[style*="background:#fff"],
+      .modern-color-option label[style*="background:#ffffff"],
+      .modern-color-option label[style*="background:rgb(255,255,255)"],
+      .modern-color-option label[style*="background:rgba(255,255,255"] {
+        border: 3px solid #bbb;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.25);
       }
       
       .modern-size-option label {
@@ -1549,7 +1596,7 @@
     
     /* تحسينات إضافية للفورم الجديد */
     .modern-form-container {
-      animation: fadeInUp 0.6s ease-out, formDance 3s ease-in-out infinite;
+      animation: fadeInUp 0.6s ease-out;
     }
     
     /* تنسيق السعر والحالة في سطر واحد */
@@ -1793,17 +1840,7 @@
       }
     }
     
-    @keyframes formDance {
-      0%, 100% {
-        transform: translateX(0);
-      }
-      25% {
-        transform: translateX(-3px);
-      }
-      75% {
-        transform: translateX(3px);
-      }
-    }
+
     
     @keyframes buttonDance {
       0%, 100% {
@@ -2205,6 +2242,46 @@
       }
     }
     
+    /* تحسين عرض الألوان مع مؤشر بصري */
+    .modern-color-option label::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    
+    .modern-color-option input[type="radio"]:checked + label::after {
+      opacity: 1;
+    }
+    
+    /* تحسين عرض اللون الأبيض مع مؤشر مختلف */
+    .modern-color-option label[style*="background:white"]::after,
+    .modern-color-option label[style*="background:#fff"]::after,
+    .modern-color-option label[style*="background:#ffffff"]::after,
+    .modern-color-option label[style*="background:rgb(255,255,255)"]::after,
+    .modern-color-option label[style*="background:rgba(255,255,255"]::after {
+      background: #333;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+    
+    /* تحسين عرض الألوان الفاتحة */
+    .modern-color-option label[style*="background:yellow"]::after,
+    .modern-color-option label[style*="background:#ffff00"]::after,
+    .modern-color-option label[style*="background:rgb(255,255,0)"]::after,
+    .modern-color-option label[style*="background:rgba(255,255,0"]::after,
+    .modern-color-option label[style*="background:lightyellow"]::after,
+    .modern-color-option label[style*="background:#ffffe0"]::after {
+      background: #333;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
   </style>
  
 <script type="module">
@@ -3858,15 +3935,6 @@
               <div class="row">
                 <div class="col-6">
                   <div class="modern-input-group">
-                    <label for="addressMobile">العنوان</label>
-                    <div class="input-wrapper">
-                      <span class="input-icon">📍</span>
-                      <input type="text" id="addressMobile" required>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="modern-input-group">
                     <label for="stateMobile">الولاية</label>
                     <div class="input-wrapper">
                       <span class="input-icon">🌍</span>
@@ -3875,6 +3943,25 @@
                       </select>
                     </div>
                   </div>
+                </div>
+                <div class="col-6">
+                  <div class="modern-input-group">
+                    <label for="municipalityMobile">البلدية</label>
+                    <div class="input-wrapper">
+                      <span class="input-icon">🏘️</span>
+                      <select id="municipalityMobile" required>
+                        <option value="">اختر الولاية أولاً</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="modern-input-group">
+                <label for="addressMobile">العنوان التفصيلي</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">📍</span>
+                  <input type="text" id="addressMobile" placeholder="اسم الشارع، رقم المنزل، إلخ..." required>
                 </div>
               </div>
               
@@ -4044,15 +4131,6 @@
               <div class="row">
                 <div class="col-6">
                   <div class="modern-input-group">
-                    <label for="address">العنوان</label>
-                    <div class="input-wrapper">
-                      <span class="input-icon">📍</span>
-                      <input type="text" id="address" required>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="modern-input-group">
                     <label for="state">الولاية</label>
                     <div class="input-wrapper">
                       <span class="input-icon">🌍</span>
@@ -4061,6 +4139,25 @@
                       </select>
                     </div>
                   </div>
+                </div>
+                <div class="col-6">
+                  <div class="modern-input-group">
+                    <label for="municipality">البلدية</label>
+                    <div class="input-wrapper">
+                      <span class="input-icon">🏘️</span>
+                      <select id="municipality" required>
+                        <option value="">اختر الولاية أولاً</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="modern-input-group">
+                <label for="address">العنوان التفصيلي</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">📍</span>
+                  <input type="text" id="address" placeholder="اسم الشارع، رقم المنزل، إلخ..." required>
                 </div>
               </div>
               
@@ -4152,7 +4249,30 @@
         </div>
       `;
       // بعد عرض الفورم، جلب الولايات وتحديث ملخص الطلبية
-      loadStatesAndHandleSummary(data.price, offers);
+      // تأخير بسيط للتأكد من تحميل العناصر في DOM
+      setTimeout(() => {
+        // التحقق من وجود العناصر قبل استدعاء الدالة
+        const stateEl = document.getElementById('state');
+        const stateMobileEl = document.getElementById('stateMobile');
+        const municipalityEl = document.getElementById('municipality');
+        const municipalityMobileEl = document.getElementById('municipalityMobile');
+        
+        console.log('فحص العناصر قبل استدعاء loadStatesAndHandleSummary:', {
+          state: !!stateEl,
+          stateMobile: !!stateMobileEl,
+          municipality: !!municipalityEl,
+          municipalityMobile: !!municipalityMobileEl
+        });
+        
+        if (stateEl && stateMobileEl && municipalityEl && municipalityMobileEl) {
+          loadStatesAndHandleSummary(data.price, offers);
+        } else {
+          console.error('بعض العناصر مفقودة، إعادة المحاولة...');
+          setTimeout(() => {
+            loadStatesAndHandleSummary(data.price, offers);
+          }, 500);
+        }
+      }, 100);
       // إنشاء معرض الصور
       createImagesGallery(images);
       // جلب وعرض المنتجات المرتبطة
@@ -4184,6 +4304,8 @@
         const address = orderForm.querySelector(`#address${prefix}`).value;
         const state_id = orderForm.querySelector(`#state${prefix}`).value;
         const state_name = orderForm.querySelector(`#state${prefix}`).selectedOptions[0]?.textContent || '';
+        const municipality_id = orderForm.querySelector(`#municipality${prefix}`).value;
+        const municipality_name = orderForm.querySelector(`#municipality${prefix}`).selectedOptions[0]?.textContent || '';
         const shipping_type = orderForm.querySelector(`input[name="${shippingPrefix}"]:checked`).value;
         let quantity = parseInt(orderForm.querySelector(`#quantity${prefix}`).value) || 1;
         
@@ -4255,6 +4377,8 @@
           address,
           state_id,
           state_name,
+          municipality_id,
+          municipality_name,
           shipping_type,
           color,
           color_hex,
@@ -4520,15 +4644,54 @@
       }
     }
     
-    // عدل دالة loadStatesAndHandleSummary لتدعم النماذج المنفصلة
+    // عدل دالة loadStatesAndHandleSummary لتدعم النماذج المنفصلة والبلديات
     function loadStatesAndHandleSummary(productPrice, offers = []) {
       const stateSelect = document.getElementById('state');
       const stateSelectMobile = document.getElementById('stateMobile');
+      const municipalitySelect = document.getElementById('municipality');
+      const municipalitySelectMobile = document.getElementById('municipalityMobile');
       const shippingTypeInputs = document.getElementsByName('shippingType');
       const shippingTypeInputsMobile = document.getElementsByName('shippingTypeMobile');
       const quantityInput = document.getElementById('quantity');
       const quantityInputMobile = document.getElementById('quantityMobile');
 
+      // متغير لتخزين بيانات البلديات
+      let municipalitiesData = {};
+
+      // التحقق من وجود العناصر المطلوبة
+      if (!stateSelect || !stateSelectMobile) {
+        console.warn('لم يتم العثور على عناصر اختيار الولاية');
+        console.log('العناصر الموجودة:', {
+          stateSelect: !!stateSelect,
+          stateSelectMobile: !!stateSelectMobile
+        });
+        return;
+      }
+
+      // التحقق من وجود عناصر البلدية
+      if (!municipalitySelect || !municipalitySelectMobile) {
+        console.warn('لم يتم العثور على عناصر اختيار البلدية');
+        console.log('العناصر الموجودة:', {
+          municipalitySelect: !!municipalitySelect,
+          municipalitySelectMobile: !!municipalitySelectMobile
+        });
+        return;
+      }
+
+      console.log('تم العثور على جميع العناصر المطلوبة:', {
+        stateSelect: !!stateSelect,
+        stateSelectMobile: !!stateSelectMobile,
+        municipalitySelect: !!municipalitySelect,
+        municipalitySelectMobile: !!municipalitySelectMobile
+      });
+
+      // التحقق من أن العناصر موجودة في DOM
+      console.log('فحص العناصر في DOM:', {
+        stateSelect: stateSelect?.tagName,
+        stateSelectMobile: stateSelectMobile?.tagName,
+        municipalitySelect: municipalitySelect?.tagName,
+        municipalitySelectMobile: municipalitySelectMobile?.tagName
+      });
 
       async function fetchStates() {
         const { data, error } = await supabase
@@ -4544,13 +4707,98 @@
         if (stateSelectMobile) stateSelectMobile.innerHTML = optionsHtml;
       }
 
+      // دالة جلب البلديات حسب الولاية
+      async function fetchMunicipalities(stateId, isMobile = false) {
+        console.log(`fetchMunicipalities تم استدعاؤها: stateId=${stateId}, isMobile=${isMobile}`);
+        
+        if (!stateId) {
+          const currentMunicipalitySelect = isMobile ? municipalitySelectMobile : municipalitySelect;
+          if (currentMunicipalitySelect) {
+            currentMunicipalitySelect.innerHTML = '<option value="">اختر الولاية أولاً</option>';
+          }
+          return;
+        }
+
+        // التحقق من وجود عناصر البلدية
+        const currentMunicipalitySelect = isMobile ? municipalitySelectMobile : municipalitySelect;
+        if (!currentMunicipalitySelect) {
+          console.warn('لم يتم العثور على عنصر اختيار البلدية');
+          console.log('العناصر المتاحة:', {
+            municipalitySelect: !!municipalitySelect,
+            municipalitySelectMobile: !!municipalitySelectMobile,
+            isMobile: isMobile
+          });
+          return;
+        }
+
+        // التحقق من وجود البيانات في الذاكرة
+        if (municipalitiesData[stateId]) {
+          updateMunicipalitiesSelect(stateId, isMobile);
+          return;
+        }
+
+        try {
+          const { data, error } = await supabase
+            .from('municipalities')
+            .select('*')
+            .eq('state_id', stateId)
+            .eq('is_available', true)
+            .order('municipality_name');
+
+          if (error) {
+            console.error('خطأ في جلب البلديات:', error);
+            return;
+          }
+
+          municipalitiesData[stateId] = data || [];
+          updateMunicipalitiesSelect(stateId, isMobile);
+        } catch (error) {
+          console.error('خطأ في جلب البلديات:', error);
+        }
+      }
+
+      // دالة تحديث قائمة البلديات
+      function updateMunicipalitiesSelect(stateId, isMobile) {
+        console.log(`updateMunicipalitiesSelect تم استدعاؤها: stateId=${stateId}, isMobile=${isMobile}`);
+        
+        const municipalities = municipalitiesData[stateId] || [];
+        const currentMunicipalitySelect = isMobile ? municipalitySelectMobile : municipalitySelect;
+        
+        console.log('العناصر في updateMunicipalitiesSelect:', {
+          municipalities: municipalities.length,
+          currentMunicipalitySelect: !!currentMunicipalitySelect,
+          municipalitySelect: !!municipalitySelect,
+          municipalitySelectMobile: !!municipalitySelectMobile,
+          isMobile: isMobile
+        });
+        
+        if (!currentMunicipalitySelect) {
+          console.warn('لم يتم العثور على عنصر اختيار البلدية في updateMunicipalitiesSelect');
+          return;
+        }
+
+        if (municipalities.length === 0) {
+          currentMunicipalitySelect.innerHTML = '<option value="">لا توجد بلديات متاحة</option>';
+          console.log('تم تحديث قائمة البلديات: لا توجد بلديات متاحة');
+          return;
+        }
+
+        const optionsHtml = '<option value="">اختر البلدية</option>' +
+          municipalities.map(m => `<option value="${m.id}" data-name="${m.municipality_name}">${m.municipality_name}</option>`).join('');
+        
+        currentMunicipalitySelect.innerHTML = optionsHtml;
+        console.log(`تم تحديث قائمة البلديات: ${municipalities.length} بلدية متاحة`);
+      }
+
       function updateSummary(isMobile = false) {
         const currentStateSelect = isMobile ? stateSelectMobile : stateSelect;
+        const currentMunicipalitySelect = isMobile ? municipalitySelectMobile : municipalitySelect;
         const currentShippingTypeInputs = isMobile ? shippingTypeInputsMobile : shippingTypeInputs;
         const currentQuantityInput = isMobile ? quantityInputMobile : quantityInput;
         const prefix = isMobile ? '-mobile' : '';
         
         const selectedState = statesData.find(s => s.id == currentStateSelect.value);
+        const selectedMunicipality = currentMunicipalitySelect ? municipalitiesData[currentStateSelect.value]?.find(m => m.id == currentMunicipalitySelect.value) : null;
         const shippingType = Array.from(currentShippingTypeInputs).find(i => i.checked)?.value;
         let quantity = parseInt(currentQuantityInput.value) || 1;
         let unitPrice = window.productPrice || productPrice;
@@ -4635,7 +4883,26 @@
       window.updateSummary = updateSummary;
 
       // إضافة الأحداث للنموذج العادي
-      if (stateSelect) stateSelect.addEventListener('change', () => updateSummary(false));
+      if (stateSelect) {
+        stateSelect.addEventListener('change', () => {
+          console.log('تم تغيير الولاية في النموذج العادي:', stateSelect.value);
+          fetchMunicipalities(stateSelect.value, false);
+          updateSummary(false);
+        });
+        console.log('تم إضافة حدث تغيير الولاية للنموذج العادي');
+      } else {
+        console.warn('لم يتم العثور على stateSelect لإضافة الأحداث');
+      }
+      
+      if (municipalitySelect) {
+        municipalitySelect.addEventListener('change', () => {
+          console.log('تم تغيير البلدية في النموذج العادي:', municipalitySelect.value);
+          updateSummary(false);
+        });
+        console.log('تم إضافة حدث تغيير البلدية للنموذج العادي');
+      } else {
+        console.warn('لم يتم العثور على municipalitySelect لإضافة الأحداث');
+      }
       if (shippingTypeInputs.length > 0) {
         shippingTypeInputs.forEach(i => i.addEventListener('change', () => updateSummary(false)));
       }
@@ -4664,7 +4931,26 @@
       }
 
       // إضافة الأحداث للنموذج المحمول
-      if (stateSelectMobile) stateSelectMobile.addEventListener('change', () => updateSummary(true));
+      if (stateSelectMobile) {
+        stateSelectMobile.addEventListener('change', () => {
+          console.log('تم تغيير الولاية في النموذج المحمول:', stateSelectMobile.value);
+          fetchMunicipalities(stateSelectMobile.value, true);
+          updateSummary(true);
+        });
+        console.log('تم إضافة حدث تغيير الولاية للنموذج المحمول');
+      } else {
+        console.warn('لم يتم العثور على stateSelectMobile لإضافة الأحداث');
+      }
+      
+      if (municipalitySelectMobile) {
+        municipalitySelectMobile.addEventListener('change', () => {
+          console.log('تم تغيير البلدية في النموذج المحمول:', municipalitySelectMobile.value);
+          updateSummary(true);
+        });
+        console.log('تم إضافة حدث تغيير البلدية للنموذج المحمول');
+      } else {
+        console.warn('لم يتم العثور على municipalitySelectMobile لإضافة الأحداث');
+      }
       if (shippingTypeInputsMobile.length > 0) {
         shippingTypeInputsMobile.forEach(i => i.addEventListener('change', () => updateSummary(true)));
       }
@@ -4673,6 +4959,26 @@
       fetchStates().then(() => {
         updateSummary(false);
         updateSummary(true);
+        
+        console.log('تم إضافة جميع الأحداث بنجاح');
+        console.log('الأحداث المضافة:', {
+          stateSelect: !!stateSelect,
+          stateSelectMobile: !!stateSelectMobile,
+          municipalitySelect: !!municipalitySelect,
+          municipalitySelectMobile: !!municipalitySelectMobile,
+          shippingTypeInputs: shippingTypeInputs.length,
+          shippingTypeInputsMobile: shippingTypeInputsMobile.length,
+          quantityInput: !!quantityInput,
+          quantityInputMobile: !!quantityInputMobile
+        });
+        
+        // فحص إضافي للتأكد من أن الأحداث تم إضافتها
+        console.log('فحص إضافي للأحداث:', {
+          stateSelectEvents: stateSelect ? 'تم إضافة الأحداث' : 'لم يتم العثور على العنصر',
+          stateSelectMobileEvents: stateSelectMobile ? 'تم إضافة الأحداث' : 'لم يتم العثور على العنصر',
+          municipalitySelectEvents: municipalitySelect ? 'تم إضافة الأحداث' : 'لم يتم العثور على العنصر',
+          municipalitySelectMobileEvents: municipalitySelectMobile ? 'تم إضافة الأحداث' : 'لم يتم العثور على العنصر'
+        });
       });
     }
     
