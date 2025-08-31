@@ -27,7 +27,7 @@ export async function convertToWebP(file) {
         } else {
           reject(new Error('فشل في تحويل الصورة إلى WebP'));
         }
-      }, 'image/webp', 1.0); // جودة 100%
+      }, 'image/webp', 0.8); // جودة 100%
     };
     
     img.onerror = function() {
@@ -60,3 +60,4 @@ export async function convertImageToWebP(file) {
     return file; // إرجاع الملف الأصلي في حالة الفشل
   }
 }
+
