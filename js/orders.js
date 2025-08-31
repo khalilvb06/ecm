@@ -186,12 +186,16 @@ function showOrderDetails(order) {
               <strong>${order.phone_number}</strong>
             </li>
             <li class="list-group-item d-flex justify-content-between">
-              <span>العنوان:</span>
+              <span>العنوان التفصيلي:</span>
               <strong>${order.address}</strong>
             </li>
             <li class="list-group-item d-flex justify-content-between">
               <span>الولاية:</span>
               <strong>${order.state_name || ''}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>البلدية:</span>
+              <strong>${order.municipality_name || ''}</strong>
             </li>
             <li class="list-group-item d-flex justify-content-between">
               <span>نوع الشحن:</span>
@@ -324,16 +328,22 @@ function showOrderEdit(order) {
             <label class="form-label">رقم الهاتف</label>
             <input type="text" class="form-control" name="phone_number" value="${order.phone_number}" required>
           </div>
-          <div class="col-md-12">
-            <label class="form-label">العنوان</label>
-            <input type="text" class="form-control" name="address" value="${order.address}" required>
-          </div>
           <div class="col-md-6">
             <label class="form-label">الولاية</label>
             <select class="form-select" name="state_id" id="edit-state-select" required>
               <option value="">اختر الولاية</option>
               ${statesOptions}
             </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">البلدية</label>
+            <select class="form-select" name="municipality_id" id="edit-municipality-select" required>
+              <option value="">اختر الولاية أولاً</option>
+            </select>
+          </div>
+          <div class="col-md-12">
+            <label class="form-label">العنوان التفصيلي</label>
+            <input type="text" class="form-control" name="address" value="${order.address}" placeholder="اسم الشارع، رقم المنزل، إلخ..." required>
           </div>
           <div class="col-md-6">
             <label class="form-label">نوع الشحن</label>
@@ -398,9 +408,65 @@ function setupEditFormEvents(order, offers, states) {
   const productPriceInput = document.getElementById('edit-product-price');
   const shippingPriceInput = document.getElementById('edit-shipping-price');
   const stateSelect = document.getElementById('edit-state-select');
+  const municipalitySelect = document.getElementById('edit-municipality-select');
   const shippingTypeSelect = document.getElementById('edit-shipping-type');
   const offerSelect = document.getElementById('edit-offer-select');
   const colorSelect = document.getElementById('edit-color-select');
+
+  // متغير لتخزين بيانات البلديات
+  let municipalitiesData = {};
+
+  // دالة جلب البلديات حسب الولاية
+  async function fetchMunicipalities(stateId) {
+    if (!stateId) {
+      if (municipalitySelect) {
+        municipalitySelect.innerHTML = '<option value="">اختر الولاية أولاً</option>';
+      }
+      return;
+    }
+
+    // التحقق من وجود البيانات في الذاكرة
+    if (municipalitiesData[stateId]) {
+      updateMunicipalitiesSelect(stateId);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('municipalities')
+        .select('*')
+        .eq('state_id', stateId)
+        .eq('is_available', true)
+        .order('municipality_name');
+
+      if (error) {
+        console.error('خطأ في جلب البلديات:', error);
+        return;
+      }
+
+      municipalitiesData[stateId] = data || [];
+      updateMunicipalitiesSelect(stateId);
+    } catch (error) {
+      console.error('خطأ في جلب البلديات:', error);
+    }
+  }
+
+  // دالة تحديث قائمة البلديات
+  function updateMunicipalitiesSelect(stateId) {
+    const municipalities = municipalitiesData[stateId] || [];
+    
+    if (!municipalitySelect) return;
+
+    if (municipalities.length === 0) {
+      municipalitySelect.innerHTML = '<option value="">لا توجد بلديات متاحة</option>';
+      return;
+    }
+
+    const optionsHtml = '<option value="">اختر البلدية</option>' +
+      municipalities.map(m => `<option value="${m.id}" data-name="${m.municipality_name}" ${order.municipality_id == m.id ? 'selected' : ''}>${m.municipality_name}</option>`).join('');
+    
+    municipalitySelect.innerHTML = optionsHtml;
+  }
 
   // حفظ الألوان في المتغير العام للوصول إليها لاحقاً
   if (window.productColors) {
@@ -457,8 +523,18 @@ function setupEditFormEvents(order, offers, states) {
     }
   }
 
-  if (stateSelect) stateSelect.addEventListener('change', updateShippingPrice);
+  if (stateSelect) {
+    stateSelect.addEventListener('change', () => {
+      fetchMunicipalities(stateSelect.value);
+      updateShippingPrice();
+    });
+  }
   if (shippingTypeSelect) shippingTypeSelect.addEventListener('change', updateShippingPrice);
+
+  // تحميل البلديات عند التحميل إذا كانت الولاية محددة
+  if (order.state_id) {
+    fetchMunicipalities(order.state_id);
+  }
 
   // معالجة إرسال النموذج
   form.addEventListener('submit', async function(e) {
@@ -471,6 +547,8 @@ function setupEditFormEvents(order, offers, states) {
       address: formData.get('address'),
       state_id: formData.get('state_id'),
       state_name: stateSelect.options[stateSelect.selectedIndex]?.textContent || '',
+      municipality_id: formData.get('municipality_id'),
+      municipality_name: municipalitySelect.options[municipalitySelect.selectedIndex]?.textContent || '',
       shipping_type: formData.get('shipping_type'),
       color: formData.get('color') || '',
       color_hex: getColorHex(formData.get('color')),
