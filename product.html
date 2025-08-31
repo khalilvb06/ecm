@@ -772,6 +772,8 @@
       }
       
       #success-modal .btn-success {
+        background: var(--btn-color, #28a745) !important;
+        color: var(--btn-text-color, #fff) !important;
         padding: 10px 25px;
         font-size: 0.95rem;
       }
@@ -2114,7 +2116,8 @@
     }
     
     #success-modal .btn-success {
-      background: #28a745;
+      background: var(--btn-color, #28a745) !important;
+      color: var(--btn-text-color, #fff) !important;
       border: none;
       padding: 12px 30px;
       border-radius: 25px;
@@ -2123,7 +2126,9 @@
     }
     
     #success-modal .btn-success:hover {
-      background: #218838;
+      background: var(--btn-color, #28a745) !important;
+      color: var(--btn-text-color, #fff) !important;
+      opacity: 0.9;
       transform: translateY(-2px);
     }
     
@@ -2481,16 +2486,16 @@
   
   
   <!-- مودل نجاح إرسال الطلب -->
-  <div id="success-modal" class="loading-modal" style="display: none;">
-    <div class="loading-content">
+  <div id="success-modal" class="loading-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div class="loading-content" style="background: white; padding: 2rem; border-radius: 15px; text-align: center; max-width: 400px; margin: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);">
       <div class="text-success mb-3">
         <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
-      <h4 class="text-success mb-2">تم إرسال الطلب بنجاح!</h4>
-      <p class="text-muted mb-3">سيتم التواصل معك قريباً</p>
-      <button class="btn btn-success" onclick="redirectToIndex()" style="transition: background 0.2s, transform 0.2s;" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">العودة للصفحة الرئيسية</button>
+      <h4 class="text-success mb-2">تم استلام الطلب بنجاح!</h4>
+      <p class="text-muted mb-3">سيتم التواصل معكم قريباً</p>
+      <button class="btn btn-success" onclick="redirectToIndex()" style="padding: 12px 30px; border-radius: 25px; font-weight: 600; transition: background 0.2s, transform 0.2s;" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">العودة للصفحة الرئيسية</button>
     </div>
   </div>
   
@@ -2792,12 +2797,13 @@
               background: ${backgroundColor} !important;
               color: ${textColor} !important;
             }
-            .success-modal .btn-success {
+            #success-modal .btn-success {
               background: ${backgroundColor} !important;
               color: ${textColor} !important;
             }
-            .success-modal .btn-success:hover {
+            #success-modal .btn-success:hover {
               background: ${backgroundColor} !important;
+              color: ${textColor} !important;
               opacity: 0.9;
             }
             /* تطبيق الألوان على عناصر إضافية */
@@ -3989,7 +3995,12 @@
           
           <!-- زر إرسال الطلب الثابت -->
           <div class="mobile-submit-btn">
-            <button type="submit" form="order-form-mobile" class="modern-submit-btn" ${data.available === false ? 'disabled' : ''}>
+            <button 
+              type="button" 
+              class="modern-submit-btn" 
+              ${data.available === false ? 'disabled' : ''} 
+              onclick="${data.available === false ? '' : 'document.getElementById(`order-form-mobile`).requestSubmit();'}"
+            >
               ${data.available === false ? '❌ المنتج غير متوفر' : '✅ إرسال الطلب'}
             </button>
           </div>
@@ -4361,6 +4372,21 @@
           const successModal = document.getElementById('success-modal');
           if (successModal) {
             successModal.style.display = 'flex';
+            
+            // إضافة إمكانية إغلاق المودال بالضغط على الخلفية
+            successModal.onclick = function(e) {
+              if (e.target === successModal) {
+                successModal.style.display = 'none';
+                window.location.href = 'index.html';
+              }
+            };
+            
+            // التوجيه التلقائي بعد 5 ثوانٍ
+            setTimeout(() => {
+              if (successModal.style.display === 'flex') {
+                window.location.href = 'index.html';
+              }
+            }, 5000);
           }
         }
       }
@@ -5046,8 +5072,34 @@
     // جعل الدالة متاحة عالمياً
     window.changeQuantity = changeQuantity;
     
-   
-    // تأكد من ربط الدالة بالزر بشكل صحيح
+    // دالة عرض مودال نجاح الطلب ثم التوجيه للرئيسية
+    function showSuccessModalAndRedirect() {
+      // استخدام المودال الموحد الموجود في HTML
+      const successModal = document.getElementById('success-modal');
+      if (successModal) {
+        successModal.style.display = 'flex';
+        
+        // إضافة إمكانية إغلاق المودال بالضغط على الخلفية
+        successModal.onclick = function(e) {
+          if (e.target === successModal) {
+            successModal.style.display = 'none';
+            window.redirectToIndex();
+          }
+        };
+        
+        // التوجيه التلقائي بعد 5 ثوانٍ
+        setTimeout(() => {
+          if (successModal.style.display === 'flex') {
+            window.redirectToIndex();
+          }
+        }, 5000);
+      }
+    }
+
+    // اجعل الدالة متاحة عالمياً
+    window.showSuccessModalAndRedirect = showSuccessModalAndRedirect;
+
+    // إذا كان لديك زر توجيه يدوي (احتياطي)
     document.addEventListener('DOMContentLoaded', function() {
       const redirectBtn = document.getElementById('redirect-btn');
       if (redirectBtn) {
@@ -5057,10 +5109,13 @@
         });
       }
     });
-    
-    // دالة التوجيه إلى الصفحة الرئيسية
+
+    // دالة التوجيه إلى الصفحة الرئيسية (احتياطي)
     window.redirectToIndex = function() {
-      window.location.href = 'index.html';
+      // إضافة تأخير بسيط قبل التوجيه
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 500);
     }
     
     // دالة جلب وعرض المنتجات المرتبطة
