@@ -1,0 +1,28 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/product/:id",
+      "destination": "/product.html?id=:id"
+    },
+    {
+      "source": "/category/:id",
+      "destination": "/category.html?id=:id"
+    },
+    {
+      "source": "/landingpage/:id",
+      "destination": "/landingpage.html?id=:id"
+    },
+    {
+      "source": "/all-products",
+      "destination": "/all-products.html"
+    },
+    {
+      "source": "/about-us",
+      "destination": "/about-us.html"
+    }
+  ]
+}
