@@ -2271,11 +2271,33 @@
     if (!productId) return;
 
     try {
-      // جلب المنتج
+      console.log("🚀 بدء تحميل البيكسل للمنتج...");
+      
+      // استخراج subdomain بشكل عام من hostname أو ?subdomain=
+      let subdomain = (typeof window.extractSubdomain === 'function') ? window.extractSubdomain() : 'default';
+      
+      console.log('Subdomain detected:', subdomain);
+      
+      // جلب معلومات المتجر عبر subdomain
+      const { data: storeData, error: storeError } = await supabase
+        .from('stores')
+        .select('id, name, subdomain')
+        .eq('subdomain', subdomain)
+        .single();
+      
+      if (storeError || !storeData) {
+        console.error('Store not found for subdomain:', subdomain);
+        return;
+      }
+      
+      console.log('Store found:', storeData);
+
+      // جلب المنتج مع البيكسل
       const { data: product, error: productError } = await supabase
         .from('products')
         .select('pixel')
         .eq('id', productId)
+        .eq('store_id', storeData.id)
         .single();
 
       if (productError || !product?.pixel) {
@@ -2284,12 +2306,20 @@
       }
 
       const pixelId = product.pixel;
+      console.log("📋 معرف البيكسل المحفوظ:", pixelId);
+
+      // التحقق من صحة معرف البيكسل
+      if (!pixelId || isNaN(pixelId) || pixelId <= 0) {
+        console.error("❌ معرف البيكسل غير صالح:", pixelId);
+        return;
+      }
 
       // جلب كود البيكسل
       const { data: pixelData, error: pixelError } = await supabase
         .from('ad_pixels')
         .select('id, pixel_name, pixel_code')
         .eq('id', pixelId)
+        .eq('store_id', storeData.id)
         .single();
 
       if (pixelError || !pixelData) {
@@ -2300,20 +2330,47 @@
       // تحليل JSONB
       let pixelType, pixelCode;
       try {
-        const parsed = typeof pixelData.pixel_code === 'string'
-          ? JSON.parse(pixelData.pixel_code)
-          : pixelData.pixel_code;
+        let parsed;
+        
+        // التحقق من نوع البيانات
+        if (typeof pixelData.pixel_code === 'string') {
+          parsed = JSON.parse(pixelData.pixel_code);
+        } else if (typeof pixelData.pixel_code === 'object' && pixelData.pixel_code !== null) {
+          parsed = pixelData.pixel_code;
+        } else {
+          throw new Error("نوع البيانات غير صالح");
+        }
+
+        // التحقق من وجود الحقول المطلوبة
+        if (!parsed.type || !parsed.code) {
+          throw new Error("البيانات ناقصة - يجب أن يحتوي على type و code");
+        }
 
         pixelType = parsed.type;
         pixelCode = parsed.code;
 
-        if (!pixelType || !pixelCode) throw new Error("البيانات ناقصة");
+        // التحقق من صحة البيانات
+        if (typeof pixelType !== 'string' || typeof pixelCode !== 'string') {
+          throw new Error("نوع البيانات غير صحيح");
+        }
+
+        console.log("✅ تم تحليل بيانات البيكسل بنجاح");
       } catch (e) {
-        console.error("خطأ في تحليل JSON البيكسل:", e.message);
+        console.error("❌ خطأ في تحليل JSON البيكسل:", e.message);
+        console.error("البيانات الأصلية:", pixelData.pixel_code);
         return;
       }
 
       console.log("🚀 نوع البيكسل:", pixelType, " | كود:", pixelCode);
+      
+      // التحقق من صحة كود البيكسل
+      if (!pixelCode || pixelCode.trim() === '') {
+        console.error("❌ كود البيكسل فارغ أو غير صالح");
+        return;
+      }
+
+      // تنظيف كود البيكسل من المسافات الزائدة
+      pixelCode = pixelCode.trim();
 
       // تفعيل البيكسل حسب النوع
       if (pixelType === 'facebook_pixel') {
@@ -2389,14 +2446,97 @@
       }
 
       // يمكن إضافة أنواع أخرى هنا (Google, Snapchat, إلخ)
+      else {
+        console.warn("⚠️ نوع البيكسل غير مدعوم:", pixelType);
+      }
 
     } catch (err) {
-      console.error("❌ حدث خطأ:", err);
+      console.error("❌ حدث خطأ في تحميل البيكسل:", err);
+      console.error("تفاصيل الخطأ:", {
+        message: err.message,
+        stack: err.stack
+      });
     }
   }
 
   document.addEventListener('DOMContentLoaded', injectDynamicPixel);
 </script>
+  <script>
+    // دالة لاستخراج subdomain من الرابط/الدومين مع دعم safiastore.shop وبدائل عامة
+    window.extractSubdomain = function() {
+      try {
+        const url = new URL(window.location.href);
+        const qp = url.searchParams.get('subdomain');
+        if (qp && qp.trim()) return qp.trim();
+
+        const host = window.location.hostname;
+        const parts = host.split('.');
+        // قاعدة عامة: إزالة آخر جزئين (الدومين الأساسي والـ TLD)
+        if (parts.length > 2) return parts.slice(0, -2).join('.');
+        return 'default';
+      } catch (_) {
+        return 'default';
+      }
+    };
+
+    // توافق مع دوال حالية إن وُجدت دون الكتابة فوقها
+    if (typeof window.getCurrentSubdomain !== 'function') {
+      window.getCurrentSubdomain = function() { return window.extractSubdomain(); };
+    }
+
+    // دالة مساعدة لجلب بيانات المتجر الأساسية حسب subdomain (stores, store_settings)
+    window.fetchStoreContext = async function() {
+      try {
+        const subdomain = window.extractSubdomain();
+        if (!window.supabase) {
+          console.error('Supabase SDK غير محمّل بعد');
+          return null;
+        }
+
+        const { data: store, error: storeError } = await window.supabase
+          .from('stores')
+          .select('id, name, subdomain, domain, is_active')
+          .eq('subdomain', subdomain)
+          .eq('is_active', true)
+          .single();
+
+        if (storeError || !store) {
+          console.error('تعذّر العثور على المتجر لـ subdomain:', subdomain, storeError);
+          return null;
+        }
+
+        const { data: settings } = await window.supabase
+          .from('store_settings')
+          .select('*')
+          .eq('store_id', store.id)
+          .single();
+
+        return { store, settings };
+      } catch (e) {
+        console.error('خطأ أثناء جلب سياق المتجر:', e);
+        return null;
+      }
+    };
+  </script>
+  <script>
+    // فرض وجود subdomain في رابط الصفحة إن كان متاحاً من hostname ولم يُمرَّر كـ query
+    (function ensureSubdomainInUrl(){
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const hasParam = params.has('subdomain');
+        const sub = (typeof window.extractSubdomain === 'function') ? window.extractSubdomain() : 'default';
+        if (!hasParam && sub && sub !== 'default') {
+          params.set('subdomain', sub);
+          const newUrl = `${window.location.pathname}?${params.toString()}`;
+          window.history.replaceState({}, '', newUrl);
+        }
+        // حفظ آخر ساب دومين لاستخدامه لاحقاً عند الحاجة
+        if (sub && sub !== 'default') {
+          try { localStorage.setItem('lastSubdomain', sub); } catch(_) {}
+        }
+      } catch(_) {}
+    })();
+  </script>
   
 </head>
 <body>
@@ -2417,10 +2557,10 @@
     
     <!-- روابط التنقل -->
     <nav class="nav-links">
-      <a href="index.html">الرئيسية</a>
-      <a href="category.html">التصنيفات</a>
-      <a href="all-products.html">كل المنتجات</a>
-      <a href="about-us.html">عن المتجر</a>
+      <a href="index.html?subdomain=" id="nav-home">الرئيسية</a>
+      <a href="category.html?subdomain=" id="nav-category">التصنيفات</a>
+      <a href="all-products.html?subdomain=" id="nav-products">كل المنتجات</a>
+      <a href="about-us.html?subdomain=" id="nav-about">عن المتجر</a>
     </nav>
 
     <!-- زر القائمة للهواتف -->
@@ -2463,10 +2603,10 @@
       </button>
     </div>
     <ul class="sidebar-nav">
-      <li><a href="index.html"><i class="bi bi-house-door"></i> الرئيسية</a></li>
-      <li><a href="category.html"><i class="bi bi-grid"></i> التصنيفات</a></li>
-      <li><a href="all-products.html"><i class="bi bi-bag"></i> كل المنتجات</a></li>
-      <li><a href="about-us.html"><i class="bi bi-info-circle"></i> عن المتجر</a></li>
+      <li><a href="index.html?subdomain=" id="sidebar-home"><i class="bi bi-house-door"></i> الرئيسية</a></li>
+      <li><a href="category.html?subdomain=" id="sidebar-category"><i class="bi bi-grid"></i> التصنيفات</a></li>
+      <li><a href="all-products.html?subdomain=" id="sidebar-products"><i class="bi bi-bag"></i> كل المنتجات</a></li>
+      <li><a href="about-us.html?subdomain=" id="sidebar-about"><i class="bi bi-info-circle"></i> عن المتجر</a></li>
     </ul>
   </div>
   <main class="container py-5">
@@ -2538,10 +2678,36 @@
     
     // دالة لجلب إعدادات المتجر وتطبيقها
     async function loadStoreSettings() {
+      // استخراج subdomain من query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      let subdomain = urlParams.get('subdomain');
+      
+      // إذا لم يتم العثور على subdomain، استخدم القيمة الافتراضية
+      if (!subdomain) {
+        subdomain = 'default'; // أو أي قيمة افتراضية تريدها
+      }
+      
+      console.log('Subdomain detected:', subdomain);
+      
+      // جلب معلومات المتجر عبر subdomain
+      const { data: storeData, error: storeError } = await supabase
+        .from('stores')
+        .select('id, name, subdomain')
+        .eq('subdomain', subdomain)
+        .single();
+      
+      if (storeError || !storeData) {
+        console.error('Store not found for subdomain:', subdomain);
+        return;
+      }
+      
+      console.log('Store found:', storeData);
+      
+      // جلب إعدادات المتجر باستخدام store_id
       const { data, error } = await supabase
         .from('store_settings')
         .select('*')
-        .eq('id', 1)
+        .eq('store_id', storeData.id)
         .single();
 
       if (!error && data) {
@@ -3725,29 +3891,63 @@
       const params = new URLSearchParams(window.location.search);
       return params.get('id');
     }
+    
+    function getSubdomainFromUrl() {
+      // استخدام الدالة العامة المضافة في <head>
+      if (typeof window.extractSubdomain === 'function') return window.extractSubdomain();
+      return 'default';
+    }
     async function loadProductDetails() {
       const id = getProductIdFromUrl();
+      const subdomain = getSubdomainFromUrl();
+      
       if (!id) {
         document.getElementById('product-details-row').innerHTML = '<div class="alert alert-danger">لم يتم تحديد المنتج</div>';
         return;
       }
-      const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
+      
+      // جلب معلومات المتجر أولاً
+      const { data: storeData, error: storeError } = await supabase
+        .from('stores')
+        .select('id, name, subdomain')
+        .eq('subdomain', subdomain)
+        .eq('is_active', true)
+        .single();
+      
+      if (storeError || !storeData) {
+        document.getElementById('product-details-row').innerHTML = '<div class="alert alert-danger">المتجر غير موجود</div>';
+        return;
+      }
+      // حفظ معرف المتجر لاستخدامه عند إنشاء الطلب
+      window.currentStoreId = storeData.id;
+      
+      // جلب المنتج من المتجر المحدد
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .eq('store_id', storeData.id)
+        .single();
+        
       if (error || !data) {
         document.getElementById('product-details-row').innerHTML = '<div class="alert alert-danger">لم يتم العثور على المنتج</div>';
         return;
       }
       let image = 'https://via.placeholder.com/500x350';
       try {
-        if (data.image && data.image.startsWith('[')) {
-          const images = JSON.parse(data.image);
-          if (images.length > 0) {
-            image = images[0]; // الصورة الأولى
+        if (data.image && typeof data.image === 'string') {
+          if (data.image.startsWith('[')) {
+            const images = JSON.parse(data.image);
+            if (images && Array.isArray(images) && images.length > 0) {
+              image = images[0]; // الصورة الأولى
+            }
+          } else {
+            image = data.image; // صورة واحدة
           }
-        } else if (data.image && !data.image.startsWith('[')) {
-          image = data.image; // صورة واحدة
         }
       } catch(e) {
-        if (data.image && !data.image.startsWith('[')) {
+        // في حالة فشل تحليل JSON، استخدم البيانات كما هي
+        if (data.image && typeof data.image === 'string') {
           image = data.image;
         }
       }
@@ -3764,13 +3964,19 @@
       // استرجاع الصور المتعددة
       let images = [];
       try { 
-        if (data.image && data.image.startsWith('[')) {
-          images = JSON.parse(data.image);
-        } else if (data.image && !data.image.startsWith('[')) {
-          images = [data.image];
+        if (data.image && typeof data.image === 'string') {
+          if (data.image.startsWith('[')) {
+            const parsedImages = JSON.parse(data.image);
+            if (parsedImages && Array.isArray(parsedImages)) {
+              images = parsedImages;
+            }
+          } else {
+            images = [data.image];
+          }
         }
       } catch(e) { 
-        if (data.image && !data.image.startsWith('[')) {
+        // في حالة فشل تحليل JSON، استخدم البيانات كما هي
+        if (data.image && typeof data.image === 'string') {
           images = [data.image];
         }
       }
@@ -4343,6 +4549,7 @@
           product_id: data.id,
           product_name: data.name,
           product_image: data.image,
+          store_id: window.currentStoreId || null,
           full_name,
           phone_number,
           address,
@@ -5114,14 +5321,28 @@
     window.redirectToIndex = function() {
       // إضافة تأخير بسيط قبل التوجيه
       setTimeout(() => {
-        window.location.href = 'index.html';
+        const params = new URLSearchParams(window.location.search);
+        const sub = params.get('subdomain') || 'default';
+        window.location.href = `index.html?subdomain=${sub}`;
       }, 500);
     }
     
     // دالة جلب وعرض المنتجات المرتبطة
     async function loadRelatedProducts(currentProductId, categoryId) {
       try {
-        // جلب المنتجات من نفس التصنيف أو المنتجات المتوفرة
+        // تحديد المتجر الحالي عبر subdomain لضمان عزل متعدد المتاجر
+        const params = new URLSearchParams(window.location.search);
+        const currentSub = params.get('subdomain') || 'default';
+        const { data: storeData, error: storeErr } = await supabase
+          .from('stores')
+          .select('id')
+          .eq('subdomain', currentSub)
+          .single();
+        if (storeErr || !storeData) {
+          console.warn('تعذر تحديد المتجر الحالي للمنتجات المرتبطة');
+        }
+
+        // جلب المنتجات من نفس التصنيف أو المنتجات المتوفرة، مع تقييد المتجر
         let query = supabase
           .from('products')
           .select('*')
@@ -5133,6 +5354,11 @@
         // إذا كان المنتج له تصنيف، جلب منتجات من نفس التصنيف
         if (categoryId) {
           query = query.eq('category_id', categoryId);
+        }
+
+        // تقييد حسب المتجر إن توفر
+        if (storeData?.id) {
+          query = query.eq('store_id', storeData.id);
         }
         
         const { data: relatedProducts, error } = await query;
@@ -5206,10 +5432,11 @@
         const priceSize = type === 'mobile' ? 'font-size: 0.85rem;' : 'font-size: 1rem;';
         const btnSize = type === 'mobile' ? 'font-size: 0.8rem; padding: 6px 12px;' : 'font-size: 0.9rem; padding: 8px 16px;';
         
+        const sub = getCurrentSubdomain();
         container.innerHTML += `
           <div class="${colClass} d-flex align-items-stretch mb-3">
             <div class="card h-100 w-100" style="cursor: pointer; ${cardStyle} border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.3s ease;" 
-                 onclick="window.location.href='product.html?id=${product.id}'">
+                 onclick="window.location.href='product.html?id=${product.id}&subdomain=${sub}'">
               <div class="product-image-wrapper" style="height: ${type === 'mobile' ? '120px' : '160px'}; overflow: hidden; border-radius: 12px 12px 0 0;">
                 <img src="${image}" class="card-img-top" alt="${product.name}" 
                      style="width: 100%; height: 100%; object-fit: cover;" 
@@ -5220,7 +5447,7 @@
                 <p class="card-text flex-grow-1 mb-2" style="${descSize} color: #666; line-height: 1.4;">${descr}</p>
                 <div class="mb-2" style="${priceSize} font-weight: 600; color: #007bff;">السعر: ${product.price} دج</div>
                 ${offerHtml}
-                <a href="product.html?id=${product.id}" class="btn btn-main mt-auto" 
+                <a href="product.html?id=${product.id}&subdomain=${sub}" class="btn btn-main mt-auto" 
                    style="${btnSize} border-radius: 20px; font-weight: 600;" 
                    onclick="event.stopPropagation()">
                   ${type === 'mobile' ? '🛒 طلب' : '🛒 اطلب الآن'}
@@ -5231,5 +5458,49 @@
         `;
       });
     }
+    
+    // دالة للحصول على subdomain الحالي
+    function getCurrentSubdomain() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('subdomain') || 'default';
+    }
+    
+    // دالة لتحديث جميع الروابط بدعم subdomain
+    function updateAllLinks() {
+      const subdomain = getCurrentSubdomain();
+      
+      // تحديث روابط التنقل الرئيسية
+      const navLinks = [
+        { id: 'nav-home', href: 'index.html' },
+        { id: 'nav-category', href: 'category.html' },
+        { id: 'nav-products', href: 'all-products.html' },
+        { id: 'nav-about', href: 'about-us.html' }
+      ];
+      
+      navLinks.forEach(link => {
+        const element = document.getElementById(link.id);
+        if (element) {
+          element.href = `${link.href}?subdomain=${subdomain}`;
+        }
+      });
+      
+      // تحديث روابط السايد بار
+      const sidebarLinks = [
+        { id: 'sidebar-home', href: 'index.html' },
+        { id: 'sidebar-category', href: 'category.html' },
+        { id: 'sidebar-products', href: 'all-products.html' },
+        { id: 'sidebar-about', href: 'about-us.html' }
+      ];
+      
+      sidebarLinks.forEach(link => {
+        const element = document.getElementById(link.id);
+        if (element) {
+          element.href = `${link.href}?subdomain=${subdomain}`;
+        }
+      });
+    }
+    
+    // تشغيل الدالة عند تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', updateAllLinks);
   </script>
 </body>
