@@ -4,26 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>صفحة الهبوط</title>
-  <script>
-    // حقن subdomain مبكراً جداً قبل أي سكربتات module تعتمد عليه
-    (function earlyEnsureSubdomain(){
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const hasParam = params.has('subdomain');
-        var sub = null;
-        try { if (typeof window.extractSubdomain === 'function') sub = window.extractSubdomain(); } catch(_) {}
-        // إن لم نتمكن من قراءة extractSubdomain الآن، لا نمنع إذا كان subdomain موجوداً بالفعل
-        if (!hasParam) {
-          // إن وُجد subdomain من hostname ولم يكن default، أضفه
-          if (sub && sub !== 'default') {
-            params.set('subdomain', sub);
-            const newUrl = `${window.location.pathname}?${params.toString()}`;
-            window.history.replaceState({}, '', newUrl);
-          }
-        }
-      } catch(_) {}
-    })();
-  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -1622,21 +1602,6 @@
   </script>
   <script>
     // فرض وجود subdomain في رابط صفحة الهبوط إن كان متاحاً من hostname ولم يُمرَّر كـ query
-    (function ensureSubdomainInUrl(){
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const hasParam = params.has('subdomain');
-        const sub = (typeof window.extractSubdomain === 'function') ? window.extractSubdomain() : 'default';
-        if (!hasParam && sub && sub !== 'default') {
-          params.set('subdomain', sub);
-          const newUrl = `${window.location.pathname}?${params.toString()}`;
-          window.history.replaceState({}, '', newUrl);
-        }
-        if (sub && sub !== 'default') {
-          try { localStorage.setItem('lastSubdomain', sub); } catch(_) {}
-        }
-      } catch(_) {}
-    })();
   </script>
 </head>
 <body>
