@@ -13,22 +13,15 @@ import {
   getStoreFromSubdomain
 } from './store-utils.js';
 
-// أداة مساعدة: بناء رابط مع subdomain إن وُجد (من ?subdomain أو من hostname)
+// أداة مساعدة: بناء رابط بدون subdomain لأن Vercel rewrites يتعامل مع subdomains
 function getSubdomainQuery() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const qp = urlParams.get('subdomain');
-  if (qp && qp.trim()) return `subdomain=${encodeURIComponent(qp.trim())}`;
-  if (typeof window.extractSubdomain === 'function') {
-    const s = window.extractSubdomain();
-    if (s && s !== 'default') return `subdomain=${encodeURIComponent(s)}`;
-  }
+  // لم نعد نحتاج لإضافة subdomain كـ query parameter
   return '';
 }
 
 function withSubdomain(url) {
-  const q = getSubdomainQuery();
-  if (!q) return url;
-  return url + (url.includes('?') ? '&' : '?') + q;
+  // إرجاع الرابط كما هو بدون إضافة subdomain
+  return url;
 }
 
 // دالة للحصول على subdomain الحالي (متاحة عالمياً)
@@ -63,8 +56,8 @@ function displayProducts(products = filteredProducts) {
     const descr = product.descr ? product.descr.substring(0, 50) + '...' : '';
     const offerHtml = processProductOffers(product.offers);
     
-    // إنشاء رابط المنتج مع subdomain إن وُجد
-    const productUrl = withSubdomain(`product.html?id=${product.id}`);
+    // إنشاء رابط المنتج
+    const productUrl = `product.html?id=${product.id}`;
     
     // إظهار المنتجات المتوفرة فقط
     if (product.available !== false) {
@@ -102,8 +95,8 @@ function displayLandingProducts(landingProducts) {
     const image = processProductImage(lp.image);
     const descr = lp.descr ? (lp.descr.substring(0, 50) + '...') : '';
     
-    // إنشاء رابط صفحة الهبوط مع subdomain إن وُجد
-    const landingUrl = withSubdomain(`landingPage.html?id=${lp.id}`);
+    // إنشاء رابط صفحة الهبوط
+    const landingUrl = `landingPage.html?id=${lp.id}`;
     
     list.innerHTML += `
       <div class="col-lg-4 col-md-6 col-sm-6 col-6 d-flex align-items-stretch product-card">
@@ -138,7 +131,7 @@ function displayCategories(categories = allCategories) {
   // لا حاجة لقراءة subdomain هنا
 
   categories.forEach(category => {
-    const categoryUrl = withSubdomain(`all-products.html?category=${category.id}`);
+    const categoryUrl = `all-products.html?category=${category.id}`;
     container.innerHTML += `
       <div class="col-lg-4 col-md-6 col-sm-6 col-6 d-flex align-items-stretch">
         <div class="card h-100 w-100" style="cursor: pointer;" onclick="window.location.href='${categoryUrl}'">
