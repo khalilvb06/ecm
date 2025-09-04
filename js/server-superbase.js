@@ -1,8 +1,9 @@
 // server-superbase.js
+// server-superbase.js
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-const supabaseUrl = 'https://skokhwfjyqkmewdswrcb.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrb2tod2ZqeXFrbWV3ZHN3cmNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMzE1MjEsImV4cCI6MjA3MDgwNzUyMX0.nmR3jqo3nermij5i4oRpfgUOKrKmBp9JcBqRRdPxPCQ';
+const supabaseUrl = 'https://onkdmgqbkknulmqccoex.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ua2RtZ3Fia2tudWxtcWNjb2V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NTgyNjEsImV4cCI6MjA2NzAzNDI2MX0.nGC1ohKBaJfJrabPK5VfXjqwZu1rRXA0vNEaZgNwz34';
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // وظائف Authentication
