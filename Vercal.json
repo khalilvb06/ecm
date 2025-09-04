@@ -1,28 +1,33 @@
 {
+  "version": 2,
   "rewrites": [
     {
-      "source": "/",
+      "source": "/index.html",
       "destination": "/index.html"
     },
     {
-      "source": "/product/:id",
-      "destination": "/product.html?id=:id"
+      "source": "/category.html",
+      "destination": "/category.html"
     },
     {
-      "source": "/category/:id",
-      "destination": "/category.html?id=:id"
-    },
-    {
-      "source": "/landingpage/:id",
-      "destination": "/landingpage.html?id=:id"
-    },
-    {
-      "source": "/all-products",
+      "source": "/all-products.html",
       "destination": "/all-products.html"
     },
     {
-      "source": "/about-us",
+      "source": "/about-us.html",
       "destination": "/about-us.html"
+    },
+    {
+      "source": "/product.html",
+      "destination": "/product.html"
+    },
+    {
+      "source": "/landingPage.html",
+      "destination": "/landingPage.html"
+    },
+    {
+      "source": "/",
+      "destination": "/index.html"
     }
   ]
 }
