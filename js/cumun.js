@@ -13,6 +13,24 @@ import {
   getStoreFromSubdomain
 } from './store-utils.js';
 
+// أداة مساعدة: بناء رابط مع subdomain إن وُجد (من ?subdomain أو من hostname)
+function getSubdomainQuery() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const qp = urlParams.get('subdomain');
+  if (qp && qp.trim()) return `subdomain=${encodeURIComponent(qp.trim())}`;
+  if (typeof window.extractSubdomain === 'function') {
+    const s = window.extractSubdomain();
+    if (s && s !== 'default') return `subdomain=${encodeURIComponent(s)}`;
+  }
+  return '';
+}
+
+function withSubdomain(url) {
+  const q = getSubdomainQuery();
+  if (!q) return url;
+  return url + (url.includes('?') ? '&' : '?') + q;
+}
+
 // دالة للحصول على subdomain الحالي (متاحة عالمياً)
 window.getCurrentSubdomain = async function() {
   return await getSubdomainFromUrl();
@@ -45,8 +63,8 @@ function displayProducts(products = filteredProducts) {
     const descr = product.descr ? product.descr.substring(0, 50) + '...' : '';
     const offerHtml = processProductOffers(product.offers);
     
-    // إنشاء رابط المنتج بدون تمرير subdomain كـ query param
-    const productUrl = `product.html?id=${product.id}`;
+    // إنشاء رابط المنتج مع subdomain إن وُجد
+    const productUrl = withSubdomain(`product.html?id=${product.id}`);
     
     // إظهار المنتجات المتوفرة فقط
     if (product.available !== false) {
@@ -84,8 +102,8 @@ function displayLandingProducts(landingProducts) {
     const image = processProductImage(lp.image);
     const descr = lp.descr ? (lp.descr.substring(0, 50) + '...') : '';
     
-    // إنشاء رابط صفحة الهبوط بدون تمرير subdomain كـ query param
-    const landingUrl = `landingPage.html?id=${lp.id}`;
+    // إنشاء رابط صفحة الهبوط مع subdomain إن وُجد
+    const landingUrl = withSubdomain(`landingPage.html?id=${lp.id}`);
     
     list.innerHTML += `
       <div class="col-lg-4 col-md-6 col-sm-6 col-6 d-flex align-items-stretch product-card">
@@ -120,7 +138,7 @@ function displayCategories(categories = allCategories) {
   // لا حاجة لقراءة subdomain هنا
 
   categories.forEach(category => {
-    const categoryUrl = `all-products.html?category=${category.id}`;
+    const categoryUrl = withSubdomain(`all-products.html?category=${category.id}`);
     container.innerHTML += `
       <div class="col-lg-4 col-md-6 col-sm-6 col-6 d-flex align-items-stretch">
         <div class="card h-100 w-100" style="cursor: pointer;" onclick="window.location.href='${categoryUrl}'">
@@ -744,6 +762,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // تحديد نوع الصفحة وتحميل البيانات المناسبة
   const currentPage = window.location.pathname;
+  // فرض subdomain في الرابط إن كان متاحاً ولم يُمرر كـ query (لتنقلات مباشرة)
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const hasParam = params.has('subdomain');
+    const sub = (typeof window.extractSubdomain === 'function') ? window.extractSubdomain() : 'default';
+    if (!hasParam && sub && sub !== 'default') {
+      params.set('subdomain', sub);
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      window.history.replaceState({}, '', newUrl);
+    }
+  } catch(_) {}
   
   if (currentPage.includes('index.html') || currentPage === '/') {
     await loadData();
