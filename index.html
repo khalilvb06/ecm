@@ -1577,10 +1577,10 @@
     
     <!-- روابط التنقل -->
     <nav class="nav-links">
-      <a href="index.html?subdomain=" id="nav-home">الرئيسية</a>
-      <a href="category.html?subdomain=" id="nav-category">التصنيفات</a>
-      <a href="all-products.html?subdomain=" id="nav-products">كل المنتجات</a>
-      <a href="about-us.html?subdomain=" id="nav-about">عن المتجر</a>
+      <a href="index.html" id="nav-home">الرئيسية</a>
+      <a href="category.html" id="nav-category">التصنيفات</a>
+      <a href="all-products.html" id="nav-products">كل المنتجات</a>
+      <a href="about-us.html" id="nav-about">عن المتجر</a>
     </nav>
 
     <!-- زر القائمة للهواتف -->
@@ -1676,10 +1676,10 @@
       </button>
     </div>
     <ul class="sidebar-nav">
-      <li><a href="index.html?subdomain=" id="sidebar-home"><i class="bi bi-house-door"></i> الرئيسية</a></li>
-      <li><a href="category.html?subdomain=" id="sidebar-category"><i class="bi bi-grid"></i> التصنيفات</a></li>
-      <li><a href="all-products.html?subdomain=" id="sidebar-products"><i class="bi bi-bag"></i> كل المنتجات</a></li>
-      <li><a href="about-us.html?subdomain=" id="sidebar-about"><i class="bi bi-info-circle"></i> عن المتجر</a></li>
+      <li><a href="index.html" id="sidebar-home"><i class="bi bi-house-door"></i> الرئيسية</a></li>
+      <li><a href="category.html" id="sidebar-category"><i class="bi bi-grid"></i> التصنيفات</a></li>
+      <li><a href="all-products.html" id="sidebar-products"><i class="bi bi-bag"></i> كل المنتجات</a></li>
+      <li><a href="about-us.html" id="sidebar-about"><i class="bi bi-info-circle"></i> عن المتجر</a></li>
     </ul>
     
     <!-- زر إظهار/إخفاء الفلاتر -->
@@ -1832,11 +1832,8 @@
   <script src = "js/cumun.js" type="module">
       </script>
   <script>
-    // دالة لتحديث جميع الروابط بدعم subdomain
+    // دالة لتحديث جميع الروابط (بدون subdomain لأن Vercel rewrites يتعامل مع subdomains)
     function updateAllLinks() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const subdomain = urlParams.get('subdomain') || 'default';
-      
       // تحديث روابط التنقل الرئيسية
       const navLinks = [
         { id: 'nav-home', href: 'index.html' },
@@ -1848,7 +1845,7 @@
       navLinks.forEach(link => {
         const element = document.getElementById(link.id);
         if (element) {
-          element.href = `${link.href}?subdomain=${subdomain}`;
+          element.href = link.href;
         }
       });
       
@@ -1863,7 +1860,7 @@
       sidebarLinks.forEach(link => {
         const element = document.getElementById(link.id);
         if (element) {
-          element.href = `${link.href}?subdomain=${subdomain}`;
+          element.href = link.href;
         }
       });
     }
