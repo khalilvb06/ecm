@@ -1,9 +1,14 @@
 {
-  "version": 2,
   "rewrites": [
     {
-      "source": "/index.html",
-      "destination": "/index.html"
+      "source": "/",
+      "has": [
+        {
+          "type": "query",
+          "key": "subdomain"
+        }
+      ],
+      "destination": "/"
     },
     {
       "source": "/category.html",
@@ -25,9 +30,6 @@
       "source": "/landingPage.html",
       "destination": "/landingPage.html"
     },
-    {
-      "source": "/",
-      "destination": "/index.html"
-    }
+  
   ]
 }
