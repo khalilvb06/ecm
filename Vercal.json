@@ -1,14 +1,8 @@
 {
   "redirects": [
     {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "query",
-          "key": "subdomain"
-        }
-      ],
-      "destination": "/:path*?subdomain=",
+      "source": "/test",
+      "destination": "/product.html",
       "permanent": false
     }
   ]
