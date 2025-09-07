@@ -4,11 +4,11 @@
       "source": "/:path*",
       "has": [
         {
-          "type": "query",
-          "key": "subdomain"
+          "type": "host",
+          "value": "safiastore.shop"
         }
       ],
-      "destination": "/:path*",
+      "destination": "/about-us.html",
       "permanent": false
     }
   ]
