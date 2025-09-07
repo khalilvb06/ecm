@@ -5,11 +5,22 @@
       "has": [
         {
           "type": "host",
-          "value": "safiastore.shop"
+          "value": "www.safiastore.shop"
         }
       ],
-      "destination": "/about-us.html",
-      "permanent": false
+      "destination": "https://safiastore.shop/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "query",
+          "key": "subdomain"
+        }
+      ],
+      "destination": "/:path*",
+      "permanent": true
     }
   ]
 }
