@@ -1,8 +1,12 @@
 {
   "redirects": [
     {
-      "source": "/test",
-      "destination": "/product.html",
+      "source": "/:path*",
+      "has": [
+        { "type": "host", "value": "teststore.safiastore.shop" },
+        { "type": "query", "key": "subdomain" }
+      ],
+      "destination": "/:path*?subdomain=",
       "permanent": false
     }
   ]
