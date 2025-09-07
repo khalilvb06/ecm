@@ -649,16 +649,20 @@
       });
     }
     
-    // تشغيل الدالة عند تحميل الصفحة
-    document.addEventListener('DOMContentLoaded', updateAllLinks);
-
-    document.addEventListener("DOMContentLoaded", () => {
-  const url = new URL(window.location.href);
-  if (url.searchParams.has("subdomain")) {
-    const cleanUrl = url.origin + url.pathname; // الرابط النظيف بدون معاملات
-    window.history.replaceState({}, document.title, cleanUrl);
-  }
-});
+    // دالة لتنظيف معلمة السابدومين من الرابط
+    function cleanSubdomainFromQuery() {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("subdomain")) {
+        url.searchParams.delete("subdomain"); // حذف معلمة subdomain من الرابط
+        window.history.replaceState({}, document.title, url.toString());
+      }
+    }
+    
+    // تشغيل الدوال عند تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', () => {
+      updateAllLinks();
+      cleanSubdomainFromQuery();
+    });
   </script>
 </body>
 </html>
