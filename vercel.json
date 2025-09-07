@@ -3,10 +3,16 @@
     {
       "source": "/:path*",
       "has": [
-        { "type": "host", "value": "teststore.safiastore.shop" },
-        { "type": "query", "key": "subdomain" }
+        {
+          "type": "host",
+          "value": "teststore.safiastore.shop"
+        },
+        {
+          "type": "query",
+          "key": "subdomain"
+        }
       ],
-      "destination": "/:path*?subdomain=",
+      "destination": "/:path*",
       "permanent": false
     }
   ]
