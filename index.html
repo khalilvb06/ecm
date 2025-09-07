@@ -615,43 +615,60 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script src = "js/cumun.js" type="module">
       </script>
-  <script>
-// دالة لجعل body ظاهر بعد اكتمال تحميل البيانات
-function showBody() {
-  document.body.classList.add('visible');
-}
-
-// تعديل الـ DOMContentLoaded لتشغيلها بعد كل عمليات التحميل
-document.addEventListener('DOMContentLoaded', async () => {
-  document.body.style.opacity = '0'; // اجعل الجسم مخفي مؤقتًا
-  document.body.style.transition = 'opacity 0.3s ease-in-out';
-
-  await initializePage();
-  
-  const currentPage = window.location.pathname;
-
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const hasParam = params.has('subdomain');
-    const sub = (typeof window.extractSubdomain === 'function') ? window.extractSubdomain() : 'default';
-    if (!hasParam && sub && sub !== 'default') {
-      params.set('subdomain', sub);
-      const newUrl = `${window.location.pathname}?${params.toString()}`;
-      window.history.replaceState({}, '', newUrl);
-    }
-  } catch(_) {}
-
-  if (currentPage.includes('index.html') || currentPage === '/') {
-    await loadData();
-  } else if (currentPage.includes('category.html')) {
-    await loadCategoriesData();
-  } else if (currentPage.includes('all-products.html')) {
-    await loadAllProductsData();
-  }
-
-  // بعد اكتمال كل التحميلات، إظهار الصفحة بسلاسة
-  showBody();
-});
+    <script>    
+  // ================================    
+// تحديث جميع الروابط في الموقع    
+// ================================    
+function updateAllLinks() {    
+  // روابط التنقل الرئيسية    
+  const navLinks = [    
+    { id: 'nav-home', href: 'index.html' },    
+    { id: 'nav-category', href: 'category.html' },    
+    { id: 'nav-products', href: 'all-products.html' },    
+    { id: 'nav-about', href: 'about-us.html' }    
+  ];    
+      
+  navLinks.forEach(link => {    
+    const element = document.getElementById(link.id);    
+    if (element) {    
+      element.href = link.href;    
+    }    
+  });    
+    
+  // روابط السايد بار    
+  const sidebarLinks = [    
+    { id: 'sidebar-home', href: 'index.html' },    
+    { id: 'sidebar-category', href: 'category.html' },    
+    { id: 'sidebar-products', href: 'all-products.html' },    
+    { id: 'sidebar-about', href: 'about-us.html' }    
+  ];    
+      
+  sidebarLinks.forEach(link => {    
+    const element = document.getElementById(link.id);    
+    if (element) {    
+      element.href = link.href;    
+    }    
+  });    
+}    
+    
+// ================================    
+// إزالة باراميتر subdomain من الرابط    
+// ================================    
+function cleanSubdomainParam() {    
+  const url = new URL(window.location);    
+  if (url.searchParams.has('subdomain')) {    
+    url.searchParams.delete('subdomain');    
+    window.history.replaceState({}, document.title, url.pathname);    
+  }    
+}    
+    
+// ================================    
+// تشغيل كل شيء عند تحميل الصفحة    
+// ================================    
+document.addEventListener('DOMContentLoaded', () => {    
+  updateAllLinks();    
+  cleanSubdomainParam();    
+});    
   </script>
 </body>
 </html>
