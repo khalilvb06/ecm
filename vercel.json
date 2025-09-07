@@ -1,1 +1,15 @@
-
+{
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "query",
+          "key": "subdomain",
+          "value": "(.*)"
+        }
+      ],
+      "destination": "/:path*"
+    }
+  ]
+}
