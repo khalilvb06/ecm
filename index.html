@@ -616,53 +616,59 @@
   <script src = "js/cumun.js" type="module">
       </script>
   <script>
-    // دالة لتحديث جميع الروابط (بدون subdomain لأن Vercel rewrites يتعامل مع subdomains)
-    function updateAllLinks() {
-      // تحديث روابط التنقل الرئيسية
-      const navLinks = [
-        { id: 'nav-home', href: 'index.html' },
-        { id: 'nav-category', href: 'category.html' },
-        { id: 'nav-products', href: 'all-products.html' },
-        { id: 'nav-about', href: 'about-us.html' }
-      ];
-      
-      navLinks.forEach(link => {
-        const element = document.getElementById(link.id);
-        if (element) {
-          element.href = link.href;
-        }
-      });
-      
-      // تحديث روابط السايد بار
-      const sidebarLinks = [
-        { id: 'sidebar-home', href: 'index.html' },
-        { id: 'sidebar-category', href: 'category.html' },
-        { id: 'sidebar-products', href: 'all-products.html' },
-        { id: 'sidebar-about', href: 'about-us.html' }
-      ];
-      
-      sidebarLinks.forEach(link => {
-        const element = document.getElementById(link.id);
-        if (element) {
-          element.href = link.href;
-        }
-      });
+  // ================================
+// تحديث جميع الروابط في الموقع
+// ================================
+function updateAllLinks() {
+  // روابط التنقل الرئيسية
+  const navLinks = [
+    { id: 'nav-home', href: 'index.html' },
+    { id: 'nav-category', href: 'category.html' },
+    { id: 'nav-products', href: 'all-products.html' },
+    { id: 'nav-about', href: 'about-us.html' }
+  ];
+  
+  navLinks.forEach(link => {
+    const element = document.getElementById(link.id);
+    if (element) {
+      element.href = link.href;
     }
-    
-    // دالة لتنظيف معلمة السابدومين من الرابط
-    function cleanSubdomainFromQuery() {
-      const url = new URL(window.location.href);
-      if (url.searchParams.has("subdomain")) {
-        url.searchParams.delete("subdomain"); // حذف معلمة subdomain من الرابط
-        window.history.replaceState({}, document.title, url.toString());
-      }
+  });
+
+  // روابط السايد بار
+  const sidebarLinks = [
+    { id: 'sidebar-home', href: 'index.html' },
+    { id: 'sidebar-category', href: 'category.html' },
+    { id: 'sidebar-products', href: 'all-products.html' },
+    { id: 'sidebar-about', href: 'about-us.html' }
+  ];
+  
+  sidebarLinks.forEach(link => {
+    const element = document.getElementById(link.id);
+    if (element) {
+      element.href = link.href;
     }
-    
-    // تشغيل الدوال عند تحميل الصفحة
-    document.addEventListener('DOMContentLoaded', () => {
-      updateAllLinks();
-      cleanSubdomainFromQuery();
-    });
+  });
+}
+
+// ================================
+// إزالة باراميتر subdomain من الرابط
+// ================================
+function cleanSubdomainParam() {
+  const url = new URL(window.location);
+  if (url.searchParams.has('subdomain')) {
+    url.searchParams.delete('subdomain');
+    window.history.replaceState({}, document.title, url.pathname);
+  }
+}
+
+// ================================
+// تشغيل كل شيء عند تحميل الصفحة
+// ================================
+document.addEventListener('DOMContentLoaded', () => {
+  updateAllLinks();
+  cleanSubdomainParam();
+});
   </script>
 </body>
 </html>
