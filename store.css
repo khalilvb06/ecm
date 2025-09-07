@@ -1307,3 +1307,11 @@
     }
 
   }
+body {
+  opacity: 0 !important;
+  transition: opacity 0.3s ease-in-out !important;
+}
+
+body.visible {
+  opacity: 1 !important;
+}
