@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة التصنيفات - متجر إلكتروني</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="categories.css">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(120deg, #f8fafc 0%, #e0e7ff 100%);
+        }
+        
+        
+        .page-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(102,126,234,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-title::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .page-title h1 {
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .page-title i {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        
+        .table-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            color: #fee140;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220,53,69,0.3);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #ff8c00 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-warning:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255,193,7,0.3);
+            color: white;
+        }
+        
+        .category-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e0e7ff;
+            transition: all 0.3s ease;
+        }
+        
+        .category-image:hover {
+            transform: scale(1.1);
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+        }
+        
+        .table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .table thead {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+        
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #e0e7ff;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102,126,234,0.25);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid #e9ecef;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid #e9ecef;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-icon:hover {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+        
+        @media (max-width: 767px) {
+            .page-title, .form-card, .table-card {
+                border-radius: 12px;
+                padding: 1rem;
+            }
+        }
+        
+        .action-btns .btn {
+            margin-inline: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btns .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* Global padding improvements for all screen sizes */
+        body {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        
+        .main-navbar {
+            margin-left: -10px;
+            margin-right: -10px;
+            margin-top: -10px;
+        }
+        
+        .page-title {
+            margin-left: 5px;
+            margin-right: 5px;
+            border-radius: 8px;
+        }
+        
+        /* Container padding improvements */
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        
+        /* Mobile responsive padding improvements */
+        @media (max-width: 576px) {
+            body {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+            
+            .container {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+            
+            .main-navbar {
+                margin-left: -12px;
+                margin-right: -12px;
+                margin-top: -12px;
+            }
+            
+            .page-title {
+                margin-left: 3px;
+                margin-right: 3px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
+            .main-navbar {
+                margin-left: -10px;
+                margin-right: -10px;
+                margin-top: -10px;
+            }
+        }
+        
+        .main-footer {
+            background: black !important;
+            color: rgb(255, 255, 255) !important;
+            border-radius: 25px 25px 0 0;
+            box-shadow: 0 -4px 20px rgba(102,126,234,0.08);
+        }
+    </style>
+</head>
+<body>
+    <!-- شريط التنقل المشترك -->
+    <admin-navbar></admin-navbar>
+
+    <div class="container mt-4">
+        <!-- عنوان الصفحة -->
+        <div class="page-title text-center">
+            <h1 class="mb-0">
+                <i class="fas fa-tags me-3"></i>
+                إدارة التصنيفات
+            </h1>
+        </div>
+
+        <!-- نموذج إضافة تصنيف جديد -->
+        <div class="form-card">
+            <h3 class="mb-4">
+                <i class="fas fa-plus me-2"></i>
+                إضافة تصنيف جديد
+            </h3>
+            <form id="addCategoryForm">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="categoryName" class="form-label">اسم التصنيف</label>
+                        <input type="text" class="form-control" id="categoryName" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="categoryImage" class="form-label">صورة التصنيف</label>
+                        <input type="file" class="form-control" id="categoryImage" accept="image/*" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    إنشاء التصنيف
+                </button>
+            </form>
+        </div>
+
+        <!-- نموذج تعديل التصنيف (مخفي) -->
+        <div class="form-card" id="editCategoryForm" style="display: none;">
+            <h3 class="mb-4">
+                <i class="fas fa-edit me-2"></i>
+                تعديل التصنيف
+            </h3>
+            <form id="updateCategoryForm">
+                <input type="hidden" id="editCategoryId">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="editCategoryName" class="form-label">اسم التصنيف</label>
+                        <input type="text" class="form-control" id="editCategoryName" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="editCategoryImage" class="form-label">صورة التصنيف</label>
+                        <input type="file" class="form-control" id="editCategoryImage" accept="image/*">
+                        <small class="text-muted">اترك الحقل فارغاً إذا كنت لا تريد تغيير الصورة</small>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-2"></i>
+                        حفظ التعديلات
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="cancelEdit()">
+                        <i class="fas fa-times me-2"></i>
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- جدول التصنيفات -->
+        <div class="table-card">
+            <h3 class="mb-4">
+                <i class="fas fa-list me-2"></i>
+                التصنيفات الموجودة
+            </h3>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>الصورة</th>
+                            <th>اسم التصنيف</th>
+                            <th>تاريخ الإنشاء</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoriesTableBody">
+                        <!-- سيتم ملء هذا الجدول ديناميكياً -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودل نجاح الإضافة -->
+    <div class="modal fade" id="successAddModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        نجح العملية
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                    <p class="mt-3">تم إنشاء التصنيف بنجاح!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">حسناً</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودل نجاح التعديل -->
+    <div class="modal fade" id="successEditModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        نجح العملية
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                    <p class="mt-3">تم تعديل التصنيف بنجاح!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">حسناً</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودل تأكيد الحذف -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        تأكيد الحذف
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                    <p class="mt-3">هل أنت متأكد من حذف التصنيف: <strong id="deleteCategoryName"></strong>؟</p>
+                    <p class="text-muted">لا يمكن التراجع عن هذه العملية</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                        <i class="fas fa-trash me-2"></i>
+                        حذف
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودل نجاح الحذف -->
+    <div class="modal fade" id="successDeleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        نجح العملية
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                    <p class="mt-3">تم حذف التصنيف بنجاح!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">حسناً</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">
+                <i class="fas fa-heart text-danger me-1"></i>
+                جميع الحقوق محفوظة © 2024 متجر إلكتروني
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/navbar.js"></script>
+    <script type="module" src="js/auth-guard.js"></script>
+    <script type="module" src="js/logout.js"></script>
+    <script type="module" src="js/categories.js"></script>
+</body>
+</html> 
