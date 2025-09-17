@@ -1,4 +1,4 @@
-import { supabase } from './server-superbase.js';
+import { supabase, getCurrentStore, checkStorePermission } from './server-superbase.js';
 
 // عناصر DOM
 const loginForm = document.getElementById('login-form');
@@ -210,15 +210,30 @@ document.addEventListener('DOMContentLoaded', function() {
 // دالة للتحقق من حالة تسجيل الدخول
 async function checkAuthStatus() {
   const { data: { user } } = await supabase.auth.getUser();
-  if (user) {
-    // إذا كان المستخدم مسجل دخوله بالفعل، توجيه إلى الصفحة المطلوبة أو لوحة التحكم
-    const redirectPage = sessionStorage.getItem('redirectAfterLogin');
-    if (redirectPage && redirectPage !== 'login.html') {
-      sessionStorage.removeItem('redirectAfterLogin');
-      window.location.href = redirectPage;
+  if (!user) return;
+
+  try {
+    // تحقق إضافي: وجود متجر وصلاحيات أدمن قبل إعادة التوجيه
+    const { store } = await getCurrentStore();
+    const { hasPermission } = await checkStorePermission('admin');
+
+    if (store && hasPermission) {
+      const redirectPage = sessionStorage.getItem('redirectAfterLogin');
+      if (redirectPage && redirectPage !== 'login.html') {
+        sessionStorage.removeItem('redirectAfterLogin');
+        window.location.href = redirectPage;
+      } else {
+        window.location.href = 'dashboard.html';
+      }
     } else {
-      window.location.href = 'dashboard.html';
+      // إبقاء المستخدم في صفحة تسجيل الدخول إن لم تتوفر الشروط، لتجنب حلقة إعادة التوجيه
+      // يمكن عرض رسالة لطيفة بدون كسر التجربة
+      if (typeof showError === 'function') {
+        showError('حسابك مسجل دخول، لكن لا توجد صلاحيات/متجر مرتبط. تواصل مع الإدارة.');
+      }
     }
+  } catch (_) {
+    // في حال فشل التحقق (شبكة بطيئة على الهاتف مثلاً) لا نعيد التوجيه لتجنب الحلقة
   }
 }
 
