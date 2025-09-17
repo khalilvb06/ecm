@@ -36,9 +36,9 @@ function redirectToLogin() {
 // دالة للتحقق من المصادقة مع timeout
 async function checkAuthWithTimeout() {
   try {
-    // إضافة timeout للاتصال بـ Supabase (2 ثانية فقط)
+    // إضافة timeout للاتصال بـ Supabase (أطول لتوافق الهاتف والشبكات البطيئة)
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Timeout')), 5000);
+      setTimeout(() => reject(new Error('Timeout')), 12000);
     });
     
     const authPromise = supabase.auth.getUser();
