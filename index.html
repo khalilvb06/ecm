@@ -1,674 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>متجري</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="store.css">
-  <script type="module">
-    import { supabase } from './js/server-superbase.js';
-  
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get("id");
-  
-    // دالة مساعدة للتحقق من صحة معرف البيكسل
-    function isValidPixelId(pixelId) {
-      return pixelId && !isNaN(pixelId) && pixelId > 0 && Number.isInteger(Number(pixelId));
-    }
-
-    // دالة مساعدة للتحقق من صحة بيانات البيكسل
-    function validatePixelData(pixelData) {
-      if (!pixelData || typeof pixelData !== 'object') {
-        return { valid: false, error: "بيانات البيكسل غير صالحة" };
-      }
-      
-      if (!pixelData.id || !pixelData.pixel_name || !pixelData.pixel_code) {
-        return { valid: false, error: "بيانات البيكسل ناقصة" };
-      }
-      
-      return { valid: true };
-    }
-
-    async function injectDynamicPixel() {
-      try {
-        console.log("🚀 بدء تحميل البيكسل الرئيسي...");
-        
-        // استخراج subdomain بشكل عام من hostname أو ?subdomain=
-        let subdomain = (typeof window.extractSubdomain === 'function') ? window.extractSubdomain() : 'default';
-        
-        console.log('Subdomain detected:', subdomain);
-        
-        // جلب معلومات المتجر عبر subdomain
-        const { data: storeData, error: storeError } = await supabase
-          .from('stores')
-          .select('id, name, subdomain')
-          .eq('subdomain', subdomain)
-          .single();
-        
-        if (storeError || !storeData) {
-          console.error('Store not found for subdomain:', subdomain);
-          return;
-        }
-        
-        console.log('Store found:', storeData);
-        
-        // جلب id البيكسل الرئيسي من إعدادات المتجر
-        const { data: settings, error: settingsError } = await supabase
-          .from('store_settings')
-          .select('main_pixel')
-          .eq('store_id', storeData.id)
-          .single();
-
-        // التحقق من وجود خطأ في الاستعلام
-        if (settingsError) {
-          console.error("❌ خطأ في جلب إعدادات المتجر:", settingsError.message);
-          return;
-        }
-
-        // التحقق من وجود البيانات
-        if (!settings) {
-          console.warn("⚠️ لا توجد إعدادات متجر");
-          return;
-        }
-
-        // التحقق من وجود main_pixel
-        if (!settings.main_pixel) {
-          console.warn("⚠️ لا يوجد بيكسل رئيسي محدد في إعدادات المتجر");
-          return;
-        }
-
-        const pixelId = settings.main_pixel;
-        console.log("📋 معرف البيكسل المحفوظ:", pixelId);
-
-        // التحقق من صحة معرف البيكسل باستخدام الدالة المساعدة
-        if (!isValidPixelId(pixelId)) {
-          console.error("❌ معرف البيكسل غير صالح:", pixelId);
-          return;
-        }
-
-        // جلب كود البيكسل من جدول ad_pixels
-        const { data: pixelData, error: pixelError } = await supabase
-          .from('ad_pixels')
-          .select('id, pixel_name, pixel_code')
-          .eq('id', pixelId)
-          .eq('store_id', storeData.id)
-          .single();
-
-        // التحقق من وجود خطأ في الاستعلام
-        if (pixelError) {
-          console.error("❌ خطأ في جلب بيانات البيكسل:", pixelError.message);
-          return;
-        }
-
-        // التحقق من وجود بيانات البيكسل
-        if (!pixelData) {
-          console.error("❌ البيكسل غير موجود في قاعدة البيانات");
-          return;
-        }
-
-        // التحقق من صحة بيانات البيكسل باستخدام الدالة المساعدة
-        const validation = validatePixelData(pixelData);
-        if (!validation.valid) {
-          console.error("❌ بيانات البيكسل غير صالحة:", validation.error);
-          return;
-        }
-
-        console.log("📊 بيانات البيكسل المحملة:", {
-          id: pixelData.id,
-          name: pixelData.pixel_name,
-          code_type: typeof pixelData.pixel_code
-        });
-
-        // تحليل JSONB
-        let pixelType, pixelCode;
-        try {
-          let parsed;
-          
-          // التحقق من نوع البيانات
-          if (typeof pixelData.pixel_code === 'string') {
-            parsed = JSON.parse(pixelData.pixel_code);
-          } else if (typeof pixelData.pixel_code === 'object' && pixelData.pixel_code !== null) {
-            parsed = pixelData.pixel_code;
-          } else {
-            throw new Error("نوع البيانات غير صالح");
-          }
-
-          // التحقق من وجود الحقول المطلوبة
-          if (!parsed.type || !parsed.code) {
-            throw new Error("البيانات ناقصة - يجب أن يحتوي على type و code");
-          }
-
-          pixelType = parsed.type;
-          pixelCode = parsed.code;
-
-          // التحقق من صحة البيانات
-          if (typeof pixelType !== 'string' || typeof pixelCode !== 'string') {
-            throw new Error("نوع البيانات غير صحيح");
-          }
-
-          console.log("✅ تم تحليل بيانات البيكسل بنجاح");
-        } catch (e) {
-          console.error("❌ خطأ في تحليل JSON البيكسل:", e.message);
-          console.error("البيانات الأصلية:", pixelData.pixel_code);
-          return;
-        }
-
-        console.log("🚀 نوع البيكسل:", pixelType, " | كود:", pixelCode);
-        
-        // التحقق من صحة كود البيكسل
-        if (!pixelCode || pixelCode.trim() === '') {
-          console.error("❌ كود البيكسل فارغ أو غير صالح");
-          return;
-        }
-
-        // تنظيف كود البيكسل من المسافات الزائدة
-        pixelCode = pixelCode.trim();
-  
-        // تفعيل البيكسل حسب النوع
-        if (pixelType === 'facebook_pixel') {
-          // تعريف fbq قبل تحميل أي سكريبت
-          window.fbq = window.fbq || function() {
-            (window.fbq.callMethod ? window.fbq.callMethod.apply(window.fbq, arguments) : window.fbq.queue.push(arguments));
-          };
-          window.fbq.push = window.fbq;
-          window.fbq.loaded = true;
-          window.fbq.version = '2.0';
-          window.fbq.queue = [];
-  
-          // تهيئة البيكسل فوراً
-          window.fbq('init', pixelCode);
-          console.log('🔧 تم تهيئة Facebook Pixel:', pixelCode);
-  
-          // تحميل Facebook Pixel SDK
-          const fbScript = document.createElement('script');
-          fbScript.src = 'https://connect.facebook.net/en_US/fbevents.js';
-          fbScript.async = true;
-          document.head.appendChild(fbScript);
-  
-          fbScript.onload = () => {
-            try {
-              // تتبع PageView
-              window.fbq('track', 'PageView');
-              console.log('📊 تم تتبع PageView');
-              
-              // تتبع ViewContent مع بيانات المنتج
-              window.fbq('track', 'ViewContent', {
-                content_type: 'product',
-                content_ids: [productId],
-                content_name: 'Product View',
-                value: 0,
-                currency: 'USD'
-              });
-              console.log('🛍️ تم تتبع ViewContent للمنتج:', productId);
-  
-              // إضافة فحص إضافي للتأكد من إرسال البيانات
-              setTimeout(() => {
-                console.log('🔍 فحص حالة Facebook Pixel...');
-                if (window.fbq && window.fbq.queue) {
-                  console.log('✅ Facebook Pixel يعمل بشكل صحيح');
-                } else {
-                  console.warn('⚠️ Facebook Pixel قد لا يعمل بشكل صحيح');
-                }
-              }, 2000);
-  
-              console.log('✅ Facebook Pixel تم تهيئته بنجاح:', pixelCode);
-            } catch (error) {
-              console.error('❌ خطأ في تهيئة Facebook Pixel:', error);
-            }
-          };
-        }
-  
-        else if (pixelType === 'tiktok_pixel') {
-          // تعريف ttq كمتغير عام أولاً
-          window.ttq = window.ttq || [];
-          
-          const ttScript = document.createElement('script');
-          ttScript.src = 'https://analytics.tiktok.com/i18n/pixel/sdk.js?sdkid=' + pixelCode + '&lib=ttq';
-          ttScript.async = true;
-          document.head.appendChild(ttScript);
-  
-          ttScript.onload = () => {
-            // التأكد من وجود ttq قبل استخدامه
-            if (window.ttq && Array.isArray(window.ttq)) {
-              window.ttq.push(['init', pixelCode]);
-              window.ttq.push(['track', 'PageView']);
-              window.ttq.push(['track', 'ViewContent']);
-            }
-          };
-        }
-  
-        // يمكن إضافة أنواع أخرى هنا (Google, Snapchat, إلخ)
-        else {
-          console.warn("⚠️ نوع البيكسل غير مدعوم:", pixelType);
-        }
-  
-      } catch (err) {
-        console.error("❌ حدث خطأ في تحميل البيكسل:", err);
-        console.error("تفاصيل الخطأ:", {
-          message: err.message,
-          stack: err.stack
-        });
-      }
-    }
-  
-    // تشغيل الدالة عند تحميل الصفحة مع معالجة الأخطاء
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log("📄 تم تحميل الصفحة، بدء تحميل البيكسل...");
-      injectDynamicPixel().catch(error => {
-        console.error("❌ خطأ غير متوقع في تحميل البيكسل:", error);
-      });
-    });
-  </script>
-  <script>
-    // دالة لاستخراج subdomain من الرابط/الدومين مع دعم safiastore.shop وبدائل عامة
-    window.extractSubdomain = function() {
-      try {
-        const url = new URL(window.location.href);
-        const qp = url.searchParams.get('subdomain');
-        if (qp && qp.trim()) return qp.trim();
-
-        const host = window.location.hostname;
-        const parts = host.split('.');
-        // قاعدة عامة: إزالة آخر جزئين (الدومين الأساسي والـ TLD)
-        if (parts.length > 2) return parts.slice(0, -2).join('.');
-        return 'default';
-      } catch (_) {
-        return 'default';
-      }
-    };
-
-    // توافق مع دوال حالية إن وُجدت دون الكتابة فوقها
-    if (typeof window.getCurrentSubdomain !== 'function') {
-      window.getCurrentSubdomain = function() { return window.extractSubdomain(); };
-    }
-
-    // دالة مساعدة لجلب بيانات المتجر الأساسية حسب subdomain (stores, store_settings)
-    window.fetchStoreContext = async function() {
-      try {
-        const subdomain = window.extractSubdomain();
-        if (!window.supabase) {
-          console.error('Supabase SDK غير محمّل بعد');
-          return null;
-        }
-
-        const { data: store, error: storeError } = await window.supabase
-          .from('stores')
-          .select('id, name, subdomain, domain, is_active')
-          .eq('subdomain', subdomain)
-          .eq('is_active', true)
-          .single();
-
-        if (storeError || !store) {
-          console.error('تعذّر العثور على المتجر لـ subdomain:', subdomain, storeError);
-          return null;
-        }
-
-        const { data: settings } = await window.supabase
-          .from('store_settings')
-          .select('*')
-          .eq('store_id', store.id)
-          .single();
-
-        return { store, settings };
-      } catch (e) {
-        console.error('خطأ أثناء جلب سياق المتجر:', e);
-        return null;
-      }
-    };
-  </script>
-  <script>
-    // فرض وجود subdomain في رابط الصفحة إن كان متاحاً من hostname ولم يُمرَّر كـ query
-    (function ensureSubdomainInUrl(){
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const hasParam = params.has('subdomain');
-        const sub = (typeof window.extractSubdomain === 'function') ? window.extractSubdomain() : 'default';
-        if (!hasParam && sub && sub !== 'default') {
-          params.set('subdomain', sub);
-          const newUrl = `${window.location.pathname}?${params.toString()}`;
-          window.history.replaceState({}, '', newUrl);
-        }
-        if (sub && sub !== 'default') {
-          try { localStorage.setItem('lastSubdomain', sub); } catch(_) {}
-        }
-      } catch(_) {}
-    })();
-  </script>
-</head>
-<body>
-  
-
-
-  <!-- الشريط العلوي -->
-  <div class="top-banner">
-    التوصيل السريع خلال 24 ساعة و الدفع عند الاستلام
-  </div>
-
-  <!-- الهيدر الرئيسي -->
-  <header class="main-header">
-    <!-- الشعار -->
-    <div class="logo-section">
-      <img id="store-logo" src="https://cdn-icons-png.flaticon.com/512/263/263142.png" alt="شعار المتجر">
-      <div class="logo-underline"></div>
-    </div>
-    
-    <!-- روابط التنقل -->
-    <nav class="nav-links">
-      <a href="index.html" id="nav-home">الرئيسية</a>
-      <a href="category.html" id="nav-category">التصنيفات</a>
-      <a href="all-products.html" id="nav-products">كل المنتجات</a>
-      <a href="about-us.html" id="nav-about">عن المتجر</a>
-    </nav>
-
-    <!-- زر القائمة للهواتف -->
-    <button class="menu-btn" onclick="toggleSidebar()">
-      <i class="bi bi-list"></i>
-    </button>
-
-    
-
-    <!-- زر البحث للهواتف -->
-    <button class="search-modal-btn" onclick="openSearchModal()">
-      <i class="bi bi-search"></i>
-    </button>
-  </header>
-
-  <!-- مودل البحث -->
-  <div class="search-modal" id="search-modal">
-    <div class="search-modal-content">
-      <div class="search-modal-header">
-        <h5>البحث عن المنتجات</h5>
-        <button class="search-modal-close" onclick="closeSearchModal()">
-          <i class="bi bi-x-lg"></i>
-        </button>
-      </div>
-      <input type="text" id="search-modal-input" class="search-modal-input" placeholder="اكتب اسم المنتج..." onkeyup="if(event.key === 'Enter') performModalSearch()">
-      <button class="search-modal-btn-submit" onclick="performModalSearch()">
-        <i class="bi bi-search"></i> بحث
-      </button>
-    </div>
-  </div>
-
-  <!-- مودل الفلترة -->
-  <div class="filter-modal" id="filter-modal">
-    <div class="filter-modal-content">
-      <div class="filter-modal-header">
-        <h5>فلتر المنتجات</h5>
-        <button class="filter-modal-close" onclick="closeFilterModal()">
-          <i class="bi bi-x-lg"></i>
-        </button>
-      </div>
-      <div class="filter-modal-body">
-        <div class="mb-3">
-          <label class="form-label">التصنيف</label>
-          <select id="mobile-category-filter" class="form-select">
-            <option value="">جميع التصنيفات</option>
-            <!-- سيتم تعبئة التصنيفات ديناميكياً -->
-          </select>
-        </div>
-        
-        <div class="mb-3">
-          <label class="form-label">السعر</label>
-          <select id="mobile-price-filter" class="form-select">
-            <option value="">جميع الأسعار</option>
-            <option value="0-1000">أقل من 1000 دج</option>
-            <option value="1000-5000">1000 - 5000 دج</option>
-            <option value="5000-10000">5000 - 10000 دج</option>
-            <option value="10000+">أكثر من 10000 دج</option>
-          </select>
-        </div>
-        
-        <div class="mb-3">
-          <label class="form-label">الترتيب</label>
-          <select id="mobile-sort-filter" class="form-select">
-            <option value="newest">الأحدث</option>
-            <option value="oldest">الأقدم</option>
-            <option value="price-low">السعر: من الأقل للأعلى</option>
-            <option value="price-high">السعر: من الأعلى للأقل</option>
-            <option value="name-asc">الاسم: أ-ي</option>
-            <option value="name-desc">الاسم: ي-أ</option>
-          </select>
-        </div>
-        
-        <div class="mb-3">
-          <button id="mobile-clear-filters" class="btn btn-outline-secondary w-100">
-            <i class="fas fa-redo"></i> إعادة تعيين
-          </button>
-        </div>
-      </div>
-      <div class="filter-modal-footer">
-        <button class="btn btn-secondary" onclick="closeFilterModal()">إغلاق</button>
-        <button class="btn btn-primary" onclick="applyMobileFilters()">تطبيق الفلترة</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- القائمة الجانبية -->
-  <div class="sidebar-overlay" onclick="closeSidebar()"></div>
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <h5>القائمة</h5>
-      <button class="sidebar-close" onclick="closeSidebar()">
-        <i class="bi bi-x-lg"></i>
-      </button>
-    </div>
-    <ul class="sidebar-nav">
-      <li><a href="index.html" id="sidebar-home"><i class="bi bi-house-door"></i> الرئيسية</a></li>
-      <li><a href="category.html" id="sidebar-category"><i class="bi bi-grid"></i> التصنيفات</a></li>
-      <li><a href="all-products.html" id="sidebar-products"><i class="bi bi-bag"></i> كل المنتجات</a></li>
-      <li><a href="about-us.html" id="sidebar-about"><i class="bi bi-info-circle"></i> عن المتجر</a></li>
-    </ul>
-    
-    <!-- زر إظهار/إخفاء الفلاتر -->
-    <div class="sidebar-filter-toggle">
-      <button class="btn btn-outline-primary w-100" onclick="toggleSidebarFilters()">
-        <i class="bi bi-funnel"></i> إظهار الفلاتر
-      </button>
-    </div>
-    
-    <!-- قسم الفلاتر في السايد بار -->
-    <div class="sidebar-filters" id="sidebar-filters">
-      <h6>فلتر التصنيفات</h6>
-      <select id="sidebar-category-filter" class="form-select">
-        <option value="">جميع التصنيفات</option>
-        <!-- سيتم تعبئة التصنيفات ديناميكياً -->
-      </select>
-      
-      <h6>فلتر السعر</h6>
-      <select id="sidebar-price-filter" class="form-select">
-        <option value="">جميع الأسعار</option>
-        <option value="0-1000">أقل من 1000 دج</option>
-        <option value="1000-5000">1000 - 5000 دج</option>
-        <option value="5000-10000">5000 - 10000 دج</option>
-        <option value="10000+">أكثر من 10000 دج</option>
-      </select>
-      
-      <h6>الترتيب</h6>
-      <select id="sidebar-sort-filter" class="form-select">
-        <option value="newest">الأحدث</option>
-        <option value="oldest">الأقدم</option>
-        <option value="price-low">السعر: من الأقل للأعلى</option>
-        <option value="price-high">السعر: من الأعلى للأقل</option>
-        <option value="name-asc">الاسم: أ-ي</option>
-        <option value="name-desc">الاسم: ي-أ</option>
-      </select>
-      
-      <button id="sidebar-clear-filters" class="btn btn-outline-secondary w-100">
-        <i class="fas fa-redo"></i> إعادة تعيين
-      </button>
-      
-      <button class="btn btn-primary w-100" onclick="applySidebarFilters()">
-        <i class="bi bi-check"></i> تطبيق الفلترة
-      </button>
-    </div>
-  </div>
-
-  <main class="container py-5">
-    <div class="section-heading-content text-center mb-3">
-      <h1 class="section-title">
-        منتجاتنا أصلية و ذات جودة عالية
-      </h1>
-      <p class="section-subtitle" style="color: #6c757d; font-size: 1.4rem; font-weight: 400; margin-top: 15px;">تصفح قائمة المنتجات الأكثر رواجا</p>
-    </div>
-    <h2 class="mb-4">المنتجات المميزة</h2>
-
-    <!-- زر الفلترة للهواتف -->
-    <button class="filter-btn" onclick="openFilterModal()">
-      <i class="bi bi-filter"></i> فلتر
-    </button>
-    <br>
-    
-    <!-- فلترة مصغرة أعلى المنتجات -->
-    <div class="mini-filter-section mb-3 p-2 rounded" style="background: #f8f9fa; border: 1px solid #e9ecef;">
-      <div class="row align-items-center g-2">
-        <div class="col-lg-2 col-md-3 col-sm-6">
-          <select id="category-filter" class="form-select form-select-sm" style="font-size: 0.85rem;">
-            <option value="">جميع التصنيفات</option>
-            <!-- سيتم تعبئة التصنيفات ديناميكياً -->
-          </select>
-        </div>
-        
-        <div class="col-lg-2 col-md-3 col-sm-6">
-          <select id="price-filter" class="form-select form-select-sm" style="font-size: 0.85rem;">
-            <option value="">جميع الأسعار</option>
-            <option value="0-1000">أقل من 1000 دج</option>
-            <option value="1000-5000">1000 - 5000 دج</option>
-            <option value="5000-10000">5000 - 10000 دج</option>
-            <option value="10000+">أكثر من 10000 دج</option>
-          </select>
-        </div>
-        
-        <div class="col-lg-2 col-md-3 col-sm-6">
-          <select id="sort-filter" class="form-select form-select-sm" style="font-size: 0.85rem;">
-            <option value="newest">الأحدث</option>
-            <option value="oldest">الأقدم</option>
-            <option value="price-low">السعر: من الأقل للأعلى</option>
-            <option value="price-high">السعر: من الأعلى للأقل</option>
-            <option value="name-asc">الاسم: أ-ي</option>
-            <option value="name-desc">الاسم: ي-أ</option>
-          </select>
-        </div>
-        
-        <div class="col-lg-2 col-md-2 col-sm-4">
-          <button id="clear-filters" class="btn btn-outline-secondary btn-sm w-100" style="border-radius: 6px; font-size: 0.8rem;">
-            <i class="fas fa-redo"></i> إعادة تعيين
-          </button>
-        </div>
-        
-        <div class="col-lg-4 col-md-1 col-sm-2">
-          <div class="search-results" id="search-results" style="display: none;">
-            <small class="text-muted"><i class="fas fa-chart-bar"></i> <span id="results-count">تم العثور على <strong>0</strong> منتج</span></small>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="row g-4" id="products-list">
-      <!-- سيتم تعبئة المنتجات ديناميكياً -->
-    </div>
-
-    <!-- منتجات بصفحات الهبوط -->
-    <section id="landing-products-section" style="display:none;">
-      <h2 class="mb-4 mt-4">منتجات بصفحات الهبوط</h2>
-      <div class="row g-4" id="landing-products-list">
-        <!-- يتم تعبئة منتجات صفحات الهبوط ديناميكياً -->
-      </div>
-    </section>
-
-    <h1 class="section-title" id="categories-section">
-      التصنيفات
-    </h1>
-    <div class="row g-4" id="categories-list">
-      <!-- سيتم تعبئة المنتجات ديناميكياً -->
-    </div>
-  </main>
-
-  <footer class="main-footer p-3 mt-5"
-          style="color: #000 !important; background: #fff; padding: 1rem 1.2rem; margin: 2rem 10px 0 10px; border-radius: 0 0 18px 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); font-size: 1rem; text-align: center;">
-    <div class="mt-2 text-center">
-      جميع الحقوق محفوظة &copy; <span id="footer-store-name">متجري</span>
-    </div>
-    <!-- أيقونات وسائل التواصل الاجتماعي -->
-    <div class="social-media-icons text-center mt-3" id="social-media-icons" style="display: none;">
-      <a href="#" class="social-icon facebook-icon" target="_blank" rel="noopener noreferrer" style="display: none;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/1024px-Facebook_Logo_%282019%29.png" alt="Facebook" style="width: 25px; height: 25px; object-fit: contain;">
-      </a>
-      <a href="#" class="social-icon instagram-icon" target="_blank" rel="noopener noreferrer" style="display: none;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/198px-Instagram_logo_2016.svg.png?20210403190622" alt="Instagram" style="width: 25px; height: 25px; object-fit: contain;">
-      </a>
-      <a href="#" class="social-icon whatsapp-icon" target="_blank" rel="noopener noreferrer" style="display: none;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/2062095_application_chat_communication_logo_whatsapp_icon.svg/105px-2062095_application_chat_communication_logo_whatsapp_icon.svg.png?20220531073934" alt="WhatsApp" style="width: 25px; height: 25px; object-fit: contain;">
-      </a>
-      <a href="#" class="social-icon tiktok-icon" target="_blank" rel="noopener noreferrer" style="display: none;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Ionicons_logo-tiktok.svg/768px-Ionicons_logo-tiktok.svg.png" alt="TikTok" style="width: 25px; height: 25px; object-fit: contain;">
-      </a>
-    </div>
-  </footer>
-  
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script src = "js/cumun.js" type="module">
-      </script>
-    <script>    
-  // ================================    
-// تحديث جميع الروابط في الموقع    
-// ================================    
-function updateAllLinks() {    
-  // روابط التنقل الرئيسية    
-  const navLinks = [    
-    { id: 'nav-home', href: 'index.html' },    
-    { id: 'nav-category', href: 'category.html' },    
-    { id: 'nav-products', href: 'all-products.html' },    
-    { id: 'nav-about', href: 'about-us.html' }    
-  ];    
-      
-  navLinks.forEach(link => {    
-    const element = document.getElementById(link.id);    
-    if (element) {    
-      element.href = link.href;    
-    }    
-  });    
-    
-  // روابط السايد بار    
-  const sidebarLinks = [    
-    { id: 'sidebar-home', href: 'index.html' },    
-    { id: 'sidebar-category', href: 'category.html' },    
-    { id: 'sidebar-products', href: 'all-products.html' },    
-    { id: 'sidebar-about', href: 'about-us.html' }    
-  ];    
-      
-  sidebarLinks.forEach(link => {    
-    const element = document.getElementById(link.id);    
-    if (element) {    
-      element.href = link.href;    
-    }    
-  });    
-}    
-    
-// ================================    
-// إزالة باراميتر subdomain من الرابط    
-// ================================    
-function cleanSubdomainParam() {    
-  const url = new URL(window.location);    
-  if (url.searchParams.has('subdomain')) {    
-    url.searchParams.delete('subdomain');    
-    window.history.replaceState({}, document.title, url.pathname);    
-  }    
-}    
-    
-// ================================    
-// تشغيل كل شيء عند تحميل الصفحة    
-// ================================    
-document.addEventListener('DOMContentLoaded', () => {    
-  updateAllLinks();    
-  cleanSubdomainParam();    
-});    
-  </script>
-</body>
-</html>
