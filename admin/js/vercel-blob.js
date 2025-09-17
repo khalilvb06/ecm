@@ -15,10 +15,11 @@ export async function uploadToVercelBlob(file, folder = 'images') {
     console.log(`📤 Uploading file: ${filename} to Vercel Blob`);
 
     // رفع الملف مباشرة إلى Vercel Blob عبر REST API
-    const response = await fetch(`https://blob.vercel-storage.com/${encodeURIComponent(filename)}`, {
+    // استخدم access=public عبر Query بدلاً من رأس غير مدعوم
+    const response = await fetch(`https://blob.vercel-storage.com/${encodeURIComponent(filename)}?access=public`, {
       method: 'PUT',
       headers: {
-        'x-vercel-blobs-token': token,
+        // ملاحظة: تجنب الرؤوس المخصصة التي تفشل الـ CORS
         'Authorization': `Bearer ${token}`,
         'content-type': file.type || 'application/octet-stream'
       },
@@ -72,7 +73,6 @@ export async function deleteFromVercelBlob(url) {
     const response = await fetch(`https://blob.vercel-storage.com/${encodeURIComponent(pathname)}`, {
       method: 'DELETE',
       headers: {
-        'x-vercel-blobs-token': token,
         'Authorization': `Bearer ${token}`
       }
     });
