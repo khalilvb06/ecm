@@ -1,10 +1,10 @@
 // إعدادات النطاق للمتاجر
 export const DOMAIN_CONFIG = {
   // النطاق الأساسي للمتاجر
-  BASE_DOMAIN: "localhost:8080", // يمكن تغيير هذا إلى النطاق الفعلي
+  BASE_DOMAIN: "safiastore.shop", // يمكن تغيير هذا إلى النطاق الفعلي
   
   // بروتوكول الاتصال
-  PROTOCOL: "http",
+  PROTOCOL: "https",
   
   // دالة لبناء URL المتجر
   buildStoreUrl: (subdomain) => {
