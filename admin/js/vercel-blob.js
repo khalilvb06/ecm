@@ -20,8 +20,7 @@ export async function uploadToVercelBlob(file, folder = 'images') {
       headers: {
         'x-vercel-blobs-token': token,
         'Authorization': `Bearer ${token}`,
-        'content-type': file.type || 'application/octet-stream',
-        'x-vercel-blob-access': 'public'
+        'content-type': file.type || 'application/octet-stream'
       },
       body: file
     });
