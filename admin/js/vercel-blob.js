@@ -1,4 +1,3 @@
-import { put, del } from '@vercel/blob';
 import { BLOB_CONFIG, validateBlobConfig } from './config.js';
 
 // دالة لرفع الصور إلى Vercel Blob مباشرة من الـ frontend
@@ -15,11 +14,24 @@ export async function uploadToVercelBlob(file, folder = 'images') {
 
     console.log(`📤 Uploading file: ${filename} to Vercel Blob`);
 
-    // رفع الملف مباشرة إلى Vercel Blob
-    const blob = await put(filename, file, {
-      access: 'public',
-      token: token
+    // رفع الملف مباشرة إلى Vercel Blob عبر REST API
+    const response = await fetch(`https://blob.vercel-storage.com/${encodeURIComponent(filename)}`, {
+      method: 'PUT',
+      headers: {
+        'x-vercel-blobs-token': token,
+        'Authorization': `Bearer ${token}`,
+        'content-type': file.type || 'application/octet-stream',
+        'x-vercel-blob-access': 'public'
+      },
+      body: file
     });
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      throw new Error(`Vercel Blob upload failed (${response.status}): ${text}`);
+    }
+
+    const blob = await response.json();
 
     console.log(`✅ File uploaded successfully: ${blob.url}`);
 
@@ -41,20 +53,37 @@ export async function deleteFromVercelBlob(url) {
     
     const token = BLOB_CONFIG.BLOB_READ_WRITE_TOKEN;
 
-    // استخراج اسم الملف من الرابط
-    const filename = url.split('/').pop();
-    if (!filename) {
-      throw new Error('لا يمكن استخراج اسم الملف من الرابط');
+    // استخراج المسار الكامل للملف من الرابط (folder/name.ext)
+    let pathname = '';
+    try {
+      const u = new URL(url);
+      pathname = u.pathname.startsWith('/') ? u.pathname.slice(1) : u.pathname;
+    } catch (_) {
+      // في حال لم يكن الرابط صالحاً، نعود للطريقة القديمة مع تحذير
+      const parts = url.split('://');
+      pathname = parts.length > 1 ? parts[1].split('/').slice(1).join('/') : url.split('/').slice(3).join('/');
+    }
+    if (!pathname) {
+      throw new Error('لا يمكن استخراج مسار الملف من الرابط');
     }
     
-    console.log(`🗑️ Deleting file: ${filename} from Vercel Blob`);
+    console.log(`🗑️ Deleting file: ${pathname} from Vercel Blob`);
 
-    // حذف الملف مباشرة من Vercel Blob
-    await del(filename, {
-      token: token
+    // حذف الملف مباشرة من Vercel Blob عبر REST API
+    const response = await fetch(`https://blob.vercel-storage.com/${encodeURIComponent(pathname)}`, {
+      method: 'DELETE',
+      headers: {
+        'x-vercel-blobs-token': token,
+        'Authorization': `Bearer ${token}`
+      }
     });
 
-    console.log(`✅ File deleted successfully: ${filename}`);
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      throw new Error(`Vercel Blob delete failed (${response.status}): ${text}`);
+    }
+
+    console.log(`✅ File deleted successfully: ${pathname}`);
     
     return true;
   } catch (error) {
