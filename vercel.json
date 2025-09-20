@@ -3,12 +3,13 @@
   "buildCommand": "npm run build && cp -r admin dist/admin",
   "outputDirectory": "dist",
   "routes": [
-    { "src": "^/admin/?$", "dest": "/admin/dashboard.html" },
     { "src": "^/admin/login/?$", "dest": "/admin/login.html" },
     { "src": "^/admin/shipping-new/?$", "dest": "/admin/shipping-new.html" },
     { "src": "^/admin/([^/]+)/?$", "dest": "/admin/$1.html" },
+    { "src": "^/admin/?$", "dest": "/admin/dashboard.html" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/" }
   ]
 }
+
 
