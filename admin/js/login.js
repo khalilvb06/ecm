@@ -1,5 +1,10 @@
 import { supabase, getCurrentStore, checkStorePermission } from './server-superbase.js';
 
+// Debug logging
+console.log('=== بدء تحميل login.js ===');
+console.log('الرابط الحالي:', window.location.href);
+console.log('المسار الحالي:', window.location.pathname);
+
 // عناصر DOM
 const loginForm = document.getElementById('login-form');
 const emailInput = document.getElementById('email');
