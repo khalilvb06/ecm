@@ -451,31 +451,31 @@ class Dashboard {
     // تحديث كروت التنقل
     updateNavCards() {
         // تحديث عدد المنتجات
-        const productsBadge = document.querySelector('.nav-card[href="products.html"] .badge');
+        const productsBadge = document.querySelector('.nav-card[href="/admin/products"] .badge');
         if (productsBadge) {
             productsBadge.textContent = `${this.stats.products} منتج`;
         }
         
         // تحديث عدد الطلبات
-        const ordersBadge = document.querySelector('.nav-card[href="orders.html"] .badge');
+        const ordersBadge = document.querySelector('.nav-card[href="/admin/orders"] .badge');
         if (ordersBadge) {
             ordersBadge.textContent = `${this.stats.orders} طلب`;
         }
         
         // تحديث عدد الولايات المتاحة للشحن
-        const shippingBadge = document.querySelector('.nav-card[href="shipping.html"] .badge');
+        const shippingBadge = document.querySelector('.nav-card[href="/admin/shipping"] .badge');
         if (shippingBadge) {
             shippingBadge.textContent = `${this.stats.shipping} ولاية`;
         }
         
         // تحديث عدد الإعلانات
-        const adsBadge = document.querySelector('.nav-card[href="ads.html"] .badge');
+        const adsBadge = document.querySelector('.nav-card[href="/admin/ads"] .badge');
         if (adsBadge) {
             adsBadge.textContent = `${this.stats.ads} إعلان نشط`;
         }
         
         // تحديث عدد التصنيفات
-        const categoriesBadge = document.querySelector('.nav-card[href="categories.html"] .badge');
+        const categoriesBadge = document.querySelector('.nav-card[href="/admin/categories"] .badge');
         if (categoriesBadge) {
             categoriesBadge.textContent = `${this.stats.categories} تصنيف`;
         }
