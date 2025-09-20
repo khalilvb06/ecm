@@ -5,8 +5,10 @@ import { DOMAIN_CONFIG } from './domain-config.js';
 class AdminNavbar extends HTMLElement {
   connectedCallback() {
     const current = (location.pathname.split('/').pop() || '').toLowerCase();
+    // Remove .html extension if present for comparison
+    const currentPage = current.replace('.html', '');
 
-    const isActive = (href) => current === href.toLowerCase();
+    const isActive = (pageName) => currentPage === pageName.toLowerCase();
 
     // Styles are now provided by css/navbar.css included on each page
 
@@ -14,7 +16,7 @@ class AdminNavbar extends HTMLElement {
     this.innerHTML = `
 <nav class="navbar navbar-expand-lg main-navbar sticky-top">
   <div class="container">
-    <a class="navbar-brand d-flex align-items-center gap-2" href="dashboard.html">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/admin/dashboard">
       <span style="font-size:1.7rem;">🛒</span> متجر إلكتروني
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu">
@@ -23,14 +25,14 @@ class AdminNavbar extends HTMLElement {
 
     <div class="collapse navbar-collapse d-none d-lg-block" id="navbarNav">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link ${isActive('dashboard.html') ? 'active' : ''}" href="dashboard.html"><span>🏠</span> لوحة التحكم</a></li>
-        <li class="nav-item"><a class="nav-link ${isActive('products.html') ? 'active' : ''}" href="products.html"><span>🛍️</span> المنتجات</a></li>
-        <li class="nav-item"><a class="nav-link ${isActive('categories.html') ? 'active' : ''}" href="categories.html"><span>🏷️</span> التصنيفات</a></li>
-        <li class="nav-item"><a class="nav-link ${isActive('addLandingPage.html') ? 'active' : ''}" href="addLandingPage.html"><span>📄</span> صفحات الهبوط</a></li>
-        <li class="nav-item"><a class="nav-link ${isActive('orders.html') ? 'active' : ''}" href="orders.html"><span>🛒</span> الطلبات</a></li>
-        <li class="nav-item"><a class="nav-link ${isActive('shipping.html') ? 'active' : ''}" href="shipping.html"><span>🚚</span> الشحن</a></li>
-        <li class="nav-item"><a class="nav-link ${isActive('ads.html') ? 'active' : ''}" href="ads.html"><span>📢</span> الإعلانات</a></li>
-        <li class="nav-item"><a class="nav-link ${isActive('sitting.html') ? 'active' : ''}" href="sitting.html"><span>⚙️</span> الإعدادات</a></li>
+        <li class="nav-item"><a class="nav-link ${isActive('dashboard') ? 'active' : ''}" href="/admin/dashboard"><span>🏠</span> لوحة التحكم</a></li>
+        <li class="nav-item"><a class="nav-link ${isActive('products') ? 'active' : ''}" href="/admin/products"><span>🛍️</span> المنتجات</a></li>
+        <li class="nav-item"><a class="nav-link ${isActive('categories') ? 'active' : ''}" href="/admin/categories"><span>🏷️</span> التصنيفات</a></li>
+        <li class="nav-item"><a class="nav-link ${isActive('addLandingPage') ? 'active' : ''}" href="/admin/addLandingPage"><span>📄</span> صفحات الهبوط</a></li>
+        <li class="nav-item"><a class="nav-link ${isActive('orders') ? 'active' : ''}" href="/admin/orders"><span>🛒</span> الطلبات</a></li>
+        <li class="nav-item"><a class="nav-link ${isActive('shipping') || isActive('shipping-new') ? 'active' : ''}" href="/admin/shipping-new"><span>🚚</span> الشحن</a></li>
+        <li class="nav-item"><a class="nav-link ${isActive('ads') ? 'active' : ''}" href="/admin/ads"><span>📢</span> الإعلانات</a></li>
+        <li class="nav-item"><a class="nav-link ${isActive('sitting') ? 'active' : ''}" href="/admin/sitting"><span>⚙️</span> الإعدادات</a></li>
         <li class="nav-item">
           <a class="nav-link btn btn-light text-dark px-3 py-2 rounded-3 ms-2" href="#" onclick="viewStore()" style="background-color: #4a4141 !important; border: 1px solid #dee2e6;">
             <span>🏪</span> عرض المتجر
@@ -51,14 +53,14 @@ class AdminNavbar extends HTMLElement {
       </div>
       <div class="offcanvas-body">
         <ul class="navbar-nav">
-          <li class="nav-item"><a class="nav-link ${isActive('dashboard.html') ? 'active' : ''}" href="dashboard.html">🏠 لوحة التحكم</a></li>
-          <li class="nav-item"><a class="nav-link ${isActive('products.html') ? 'active' : ''}" href="products.html">🛍️ المنتجات</a></li>
-          <li class="nav-item"><a class="nav-link ${isActive('categories.html') ? 'active' : ''}" href="categories.html">🏷️ التصنيفات</a></li>
-          <li class="nav-item"><a class="nav-link ${isActive('addLandingPage.html') ? 'active' : ''}" href="addLandingPage.html">📄 صفحات الهبوط</a></li>
-          <li class="nav-item"><a class="nav-link ${isActive('orders.html') ? 'active' : ''}" href="orders.html">🛒 الطلبات</a></li>
-          <li class="nav-item"><a class="nav-link ${isActive('shipping.html') ? 'active' : ''}" href="shipping.html">🚚 الشحن</a></li>
-          <li class="nav-item"><a class="nav-link ${isActive('ads.html') ? 'active' : ''}" href="ads.html">📢 الإعلانات</a></li>
-          <li class="nav-item"><a class="nav-link ${isActive('sitting.html') ? 'active' : ''}" href="sitting.html">⚙️ الإعدادات</a></li>
+          <li class="nav-item"><a class="nav-link ${isActive('dashboard') ? 'active' : ''}" href="/admin/dashboard">🏠 لوحة التحكم</a></li>
+          <li class="nav-item"><a class="nav-link ${isActive('products') ? 'active' : ''}" href="/admin/products">🛍️ المنتجات</a></li>
+          <li class="nav-item"><a class="nav-link ${isActive('categories') ? 'active' : ''}" href="/admin/categories">🏷️ التصنيفات</a></li>
+          <li class="nav-item"><a class="nav-link ${isActive('addLandingPage') ? 'active' : ''}" href="/admin/addLandingPage">📄 صفحات الهبوط</a></li>
+          <li class="nav-item"><a class="nav-link ${isActive('orders') ? 'active' : ''}" href="/admin/orders">🛒 الطلبات</a></li>
+          <li class="nav-item"><a class="nav-link ${isActive('shipping') || isActive('shipping-new') ? 'active' : ''}" href="/admin/shipping-new">🚚 الشحن</a></li>
+          <li class="nav-item"><a class="nav-link ${isActive('ads') ? 'active' : ''}" href="/admin/ads">📢 الإعلانات</a></li>
+          <li class="nav-item"><a class="nav-link ${isActive('sitting') ? 'active' : ''}" href="/admin/sitting">⚙️ الإعدادات</a></li>
           <li class="nav-item mt-2"><a class="btn btn-light w-100" href="#" onclick="viewStore()">🏪 عرض المتجر</a></li>
           <li class="nav-item mt-2"><a class="btn btn-danger w-100 text-white" href="#" data-logout-link>🚪 تسجيل الخروج</a></li>
         </ul>
