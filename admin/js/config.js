@@ -11,6 +11,7 @@ export const BLOB_CONFIG = {
     PRODUCTS: "products",
     LANDING_PAGES: "landing-pages", 
     LOGO: "logo",
+    CATEGORIES: "categories",
     TEST: "test"
   }
 };
