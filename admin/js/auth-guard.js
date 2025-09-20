@@ -1,22 +1,25 @@
 import { supabase, getCurrentStore, checkStorePermission } from './server-superbase.js';
 
-// قائمة الصفحات الإدارية التي تحتاج مصادقة
+// قائمة الصفحات الإدارية التي تحتاج مصادقة (بدون امتداد .html)
 const ADMIN_PAGES = [
-  'dashboard.html',
-  'products.html', 
-  'addLandingPage.html',
-  'orders.html',
-  'ads.html',
-  'categories.html',
-  'shipping.html',
-  'sitting.html'
+  'dashboard',
+  'products', 
+  'addLandingPage',
+  'orders',
+  'ads',
+  'categories',
+  'shipping',
+  'shipping-new',
+  'sitting'
 ];
 
 // دالة للتحقق من أن الصفحة الحالية هي صفحة إدارية
 function isAdminPage() {
-  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  console.log('الصفحة الحالية:', currentPage);
-  const isAdmin = ADMIN_PAGES.includes(currentPage);
+  const currentPage = window.location.pathname.split('/').pop() || 'index';
+  // إزالة امتداد .html إذا كان موجوداً
+  const cleanPage = currentPage.replace('.html', '');
+  console.log('الصفحة الحالية:', cleanPage);
+  const isAdmin = ADMIN_PAGES.includes(cleanPage);
   console.log('هل هي صفحة إدارية؟', isAdmin);
   return isAdmin;
 }
@@ -25,12 +28,13 @@ function isAdminPage() {
 function redirectToLogin() {
   console.log('بدء إعادة التوجيه إلى صفحة تسجيل الدخول...');
   // حفظ الصفحة الحالية للعودة إليها بعد تسجيل الدخول
-  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  sessionStorage.setItem('redirectAfterLogin', currentPage);
-  console.log('تم حفظ الصفحة الحالية:', currentPage);
+  const currentPage = window.location.pathname.split('/').pop() || 'index';
+  const cleanPage = currentPage.replace('.html', '');
+  sessionStorage.setItem('redirectAfterLogin', cleanPage);
+  console.log('تم حفظ الصفحة الحالية:', cleanPage);
   
   // التوجيه إلى صفحة تسجيل الدخول فوراً
-  window.location.href = 'login.html';
+  window.location.href = '/admin/login';
 }
 
 // دالة للتحقق من المصادقة مع timeout
