@@ -160,7 +160,6 @@ const LandingPage = () => {
       product_price: unitPrice,
       shipping_price: shippingPrice,
       total_price: totalPrice,
-      municipality_id: null,
       municipality_name: municipalityName,
       store_id: storeId ?? null,
     });
