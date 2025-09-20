@@ -19,6 +19,13 @@ function isAdminPage() {
   // إزالة امتداد .html إذا كان موجوداً
   const cleanPage = currentPage.replace('.html', '');
   console.log('الصفحة الحالية:', cleanPage);
+  
+  // تجنب حماية صفحة تسجيل الدخول
+  if (cleanPage === 'login') {
+    console.log('صفحة تسجيل الدخول - لا حاجة للحماية');
+    return false;
+  }
+  
   const isAdmin = ADMIN_PAGES.includes(cleanPage);
   console.log('هل هي صفحة إدارية؟', isAdmin);
   return isAdmin;
@@ -103,6 +110,9 @@ async function protectAdminPages() {
 }
 
 // بدء الحماية مرة واحدة فقط عند تحميل السكريبت
+console.log('=== بدء تحميل auth-guard.js ===');
+console.log('الرابط الحالي:', window.location.href);
+console.log('المسار الحالي:', window.location.pathname);
 console.log('بدء حماية الصفحات (استدعاء واحد)...');
 protectAdminPages();
 
