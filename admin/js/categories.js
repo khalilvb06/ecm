@@ -1,6 +1,8 @@
 // استيراد Supabase
 import { supabase, getCurrentStoreId } from './server-superbase.js';
 import { convertImageToWebP } from './webp-converter.js';
+import { uploadToVercelBlob, deleteFromVercelBlob } from './vercel-blob.js';
+import { BLOB_CONFIG } from './config.js';
 
 // متغيرات عامة
 let categories = [];
@@ -147,25 +149,15 @@ async function handleAddCategory(event) {
     }
 }
 
-// رفع صورة التصنيف
+// رفع صورة التصنيف إلى Vercel Blob
 async function uploadCategoryImage(file) {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}.${fileExt}`;
-    const filePath = `categories/${fileName}`;
-
-    const { data, error } = await supabase.storage
-        .from('images')
-        .upload(filePath, file);
-
-    if (error) {
+    try {
+        const uploadResult = await uploadToVercelBlob(file, BLOB_CONFIG.FOLDERS.CATEGORIES);
+        return uploadResult.url;
+    } catch (error) {
+        console.error('خطأ في رفع صورة التصنيف:', error);
         throw error;
     }
-
-    const { data: { publicUrl } } = supabase.storage
-        .from('images')
-        .getPublicUrl(filePath);
-
-    return publicUrl;
 }
 
 // تعديل التصنيف
@@ -201,12 +193,23 @@ async function handleUpdateCategory(event) {
 
     try {
         let imageUrl = null;
+        let oldImageUrl = null;
         
-                // إذا تم اختيار صورة جديدة، قم برفعها
+        // جلب الصورة القديمة لحذفها إذا تم اختيار صورة جديدة
         if (imageFile) {
-          // تحويل الصورة إلى WebP
-          const webpFile = await convertImageToWebP(imageFile);
-          imageUrl = await uploadCategoryImage(webpFile);
+            const { data: oldCategory } = await supabase
+                .from('categories')
+                .select('image_url')
+                .eq('id', id)
+                .single();
+            
+            if (oldCategory && oldCategory.image_url) {
+                oldImageUrl = oldCategory.image_url;
+            }
+            
+            // تحويل الصورة إلى WebP
+            const webpFile = await convertImageToWebP(imageFile);
+            imageUrl = await uploadCategoryImage(webpFile);
         }
         
         // تحديث البيانات في قاعدة البيانات
@@ -224,6 +227,16 @@ async function handleUpdateCategory(event) {
             console.error('خطأ في تحديث التصنيف:', error);
             alert('حدث خطأ في تحديث التصنيف');
             return;
+        }
+
+        // حذف الصورة القديمة من Vercel Blob
+        if (oldImageUrl) {
+            try {
+                await deleteFromVercelBlob(oldImageUrl);
+                console.log('تم حذف الصورة القديمة بنجاح');
+            } catch (deleteError) {
+                console.warn('فشل في حذف الصورة القديمة:', deleteError);
+            }
         }
 
         // إخفاء نموذج التعديل
@@ -258,6 +271,18 @@ async function confirmDelete() {
     if (!currentDeleteId) return;
     
     try {
+        // جلب معلومات التصنيف لحذف الصورة
+        const { data: category, error: fetchError } = await supabase
+            .from('categories')
+            .select('image_url')
+            .eq('id', currentDeleteId)
+            .single();
+
+        if (fetchError) {
+            console.error('خطأ في جلب معلومات التصنيف:', fetchError);
+        }
+
+        // حذف التصنيف من قاعدة البيانات
         const { error } = await supabase
             .from('categories')
             .delete()
@@ -267,6 +292,16 @@ async function confirmDelete() {
             console.error('خطأ في حذف التصنيف:', error);
             alert('حدث خطأ في حذف التصنيف');
             return;
+        }
+
+        // حذف الصورة من Vercel Blob
+        if (category && category.image_url) {
+            try {
+                await deleteFromVercelBlob(category.image_url);
+                console.log('تم حذف صورة التصنيف بنجاح');
+            } catch (deleteError) {
+                console.warn('فشل في حذف صورة التصنيف:', deleteError);
+            }
         }
 
         // إغلاق مودل التأكيد
