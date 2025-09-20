@@ -113,11 +113,11 @@ async function handleLogin(email, password, rememberMe) {
     // التوجيه إلى الصفحة المطلوبة أو لوحة التحكم
     setTimeout(() => {
       const redirectPage = sessionStorage.getItem('redirectAfterLogin');
-      if (redirectPage && redirectPage !== 'login.html') {
+      if (redirectPage && redirectPage !== 'login') {
         sessionStorage.removeItem('redirectAfterLogin');
-        window.location.href = redirectPage;
+        window.location.href = `/admin/${redirectPage}`;
       } else {
-        window.location.href = 'dashboard.html';
+        window.location.href = '/admin/dashboard';
       }
     }, 500);
     
@@ -219,11 +219,11 @@ async function checkAuthStatus() {
 
     if (store && hasPermission) {
       const redirectPage = sessionStorage.getItem('redirectAfterLogin');
-      if (redirectPage && redirectPage !== 'login.html') {
+      if (redirectPage && redirectPage !== 'login') {
         sessionStorage.removeItem('redirectAfterLogin');
-        window.location.href = redirectPage;
+        window.location.href = `/admin/${redirectPage}`;
       } else {
-        window.location.href = 'dashboard.html';
+        window.location.href = '/admin/dashboard';
       }
     } else {
       // إبقاء المستخدم في صفحة تسجيل الدخول إن لم تتوفر الشروط، لتجنب حلقة إعادة التوجيه
